@@ -1,54 +1,45 @@
-<script>
-	import "../app.css";
-	import Header from './Header.svelte';
-	import './styles.css';
+<script lang="ts">
+	/** @type {import('./$types').PageData} */
+	import { onMount } from 'svelte';
+	import { session } from '$lib/state/session';
+	import { goto } from '$app/navigation';
+
+	export let data;
+
+	let loading: boolean = true;
+	let loggedIn: boolean = false;
+
+	session.subscribe((cur: any) => {
+		loading = cur?.loading;
+		loggedIn = cur?.loggedIn;
+	});
+
+	onMount(async () => {
+		const user: any = await data.getAuthUser();
+
+		const loggedIn = !!user && user?.emailVerified;
+
+		session.update((cur: any) => {
+			loading = false;
+			return {
+				...cur,
+				user,
+				loggedIn,
+				loading: false
+			};
+		});
+
+		if (loggedIn) {
+			goto('/');
+		}
+	});
 </script>
 
-<div class="app">
-	<Header />
-
-	<main>
+{#if loading}
+	<div>Loading...</div>
+{:else}
+	<div>
+		Logged in: {loggedIn}
 		<slot />
-	</main>
-
-	<footer>
-		<p>visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to learn SvelteKit</p>
-	</footer>
-</div>
-
-<style>
-	.app {
-		display: flex;
-		flex-direction: column;
-		min-height: 100vh;
-	}
-
-	main {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		padding: 1rem;
-		width: 100%;
-		max-width: 64rem;
-		margin: 0 auto;
-		box-sizing: border-box;
-	}
-
-	footer {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		padding: 12px;
-	}
-
-	footer a {
-		font-weight: bold;
-	}
-
-	@media (min-width: 480px) {
-		footer {
-			padding: 12px 0;
-		}
-	}
-</style>
+	</div>
+{/if}
