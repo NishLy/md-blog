@@ -1,8 +1,10 @@
 <script lang="ts">
 	/** @type {import('./$types').PageData} */
+	import './app.css';
 	import { onMount } from 'svelte';
 	import { session } from '$lib/state/session';
 	import { goto } from '$app/navigation';
+	import Navbar from './_component/navbar.svelte';
 
 	export let data;
 
@@ -38,8 +40,11 @@
 {#if loading}
 	<div>Loading...</div>
 {:else}
-	<div>
-		Logged in: {loggedIn}
-		<slot />
+	<div class="dark:bg-dark-primary min-h-screen">
+		<Navbar />
+		<div>
+			Logged in: {loggedIn}
+			<slot />
+		</div>
 	</div>
 {/if}
