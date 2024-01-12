@@ -1,3 +1,40 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+	h1 {
+		@apply text-4xl;
+	}
+	h2 {
+		@apply text-3xl;
+	}
+
+	h3 {
+		@apply text-2xl;
+	}
+
+	h4 {
+		@apply text-xl;
+	}
+
+	h5 {
+		@apply text-lg;
+	}
+
+	h6 {
+		@apply text-base;
+	}
+
+	p {
+		@apply text-base;
+	}
+
+	code {
+		@apply text-sm w-full overflow-auto;
+	}
+
+	.hljs {
+		@apply text-sm w-full overflow-auto  rounded-2xl;
+	}
+}
