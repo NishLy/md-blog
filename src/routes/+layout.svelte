@@ -6,7 +6,7 @@
 	import { goto } from '$app/navigation';
 	import Navbar from './_component/navbar.svelte';
 
-	// export let data;
+	export let data;
 
 	let loading: boolean = true;
 	let loggedIn: boolean = false;
@@ -16,25 +16,25 @@
 		loggedIn = cur?.loggedIn;
 	});
 
-	// onMount(async () => {
-	// 	const user: any = await data.getAuthUser();
+	onMount(async () => {
+		const user: any = await data.getAuthUser();
 
-	// 	const loggedIn = !!user && user?.emailVerified;
+		const loggedIn = !!user && user?.emailVerified;
 
-	// 	session.update((cur: any) => {
-	// 		loading = false;
-	// 		return {
-	// 			...cur,
-	// 			user,
-	// 			loggedIn,
-	// 			loading: false
-	// 		};
-	// 	});
+		session.update((cur: any) => {
+			loading = false;
+			return {
+				...cur,
+				user,
+				loggedIn,
+				loading: false
+			};
+		});
 
-	// 	if (loggedIn) {
-	// 		goto('/');
-	// 	}
-	// });
+		if (loggedIn) {
+			goto('/');
+		}
+	});
 </script>
 
 {#if loading}

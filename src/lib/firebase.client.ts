@@ -3,7 +3,7 @@ import { initializeApp, type FirebaseApp } from 'firebase/app';
 import { getAnalytics, type Analytics } from 'firebase/analytics';
 import { browser } from '$app/environment';
 import { type Auth, getAuth, connectAuthEmulator } from 'firebase/auth';
-import type { Firestore } from 'firebase/firestore';
+import { getFirestore, type Firestore } from 'firebase/firestore';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -20,23 +20,25 @@ const firebaseConfig = {
 	appId: import.meta.env.VITE_FIREBASE_APP_ID,
 	useEmulator: import.meta.env.VITE_FIREBASE_USE_EMULATOR === 'true',
 	authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-	projectId: 'md-blog-968db',
-	storageBucket: 'md-blog-968db.appspot.com',
-	messagingSenderId: '922617899521',
-	measurementId: 'G-WH6LYV2FSL'
+	projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+	storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+	messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+	measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 export const initializeFirebase = () => {
+	app = initializeApp(firebaseConfig);
+
 	if (!browser) {
+		db = getFirestore(app);
 		throw new Error("Can't use the Firebase client on the server.");
-	}
-	if (!app) {
-		app = initializeApp(firebaseConfig);
+	} else {
 		auth = getAuth(app);
 		analytics = getAnalytics(app);
-
 		if (firebaseConfig.useEmulator) {
 			connectAuthEmulator(auth, 'http://127.0.0.1:9099');
 		}
 	}
+
+	console.log(db);
 };

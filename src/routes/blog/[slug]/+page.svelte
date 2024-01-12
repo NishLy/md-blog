@@ -43,20 +43,20 @@
 
 <div class="flex justify-center">
 	<div class="p-10 flex flex-col gap-6 w-full lg:max-w-4xl">
-		<h1 class="text-4xl font-bold">{data.page.title}</h1>
+		<h1 class="text-4xl font-bold">{data.page?.title}</h1>
 		<div class="flex">
 			<img
-				src={data.page.author.avatar}
-				alt={data.page.author.name}
+				src={data.page?.author.avatar}
+				alt={data.page?.author.name}
 				class="rounded-full w-12 h-w-12"
 			/>
 			<div class="flex flex-col justify-center gap-1 ml-2">
 				<span class="text-basess text-gray-300 dark:text-gray-200 font-bold">
-					{data.page.author.name} ·{' '} <a href="./follow" class="opacity-80"> Follow </a>
+					{data.page?.author.name} ·{' '} <a href="./follow" class="opacity-80"> Follow </a>
 				</span>
 				<span class="text-sm text-gray-300 dark:text-gray-200">
-					Published in {new Date(data.page.date).toLocaleDateString()} ·{' '}
-					{data.page.readingTime} min read
+					Published in {new Date(data.page?.date ?? '1970-01-01').toLocaleDateString()} ·{' '}
+					{data.page?.readTime} min read
 				</span>
 			</div>
 		</div>
@@ -64,24 +64,29 @@
 			<div class="flex gap-4 text-sm">
 				<div>
 					<span><i class="fa-solid fa-heart"></i></span>
-					<span>{data.page.likes}</span>
+					<span>{data.page?.likesCount}</span>
 				</div>
 				<div>
 					<span><i class="fa-solid fa-comment"></i></span>
-					<span>{data.page.likes}</span>
+					<span>{data.page?.commentsCount}</span>
 				</div>
 			</div>
 		</div>
 		<div class="flex gap-2">
-			{#each data.page.tags as tag}
-				<a
-					href={'/tags/' + tag}
-					class="text-sm text-gray-500 dark:text-gray-200 rounded-2xl bg-white/20 p-1 px-2">{tag}</a
-				>
-			{/each}
+			{#if data.page}
+				{#each data.page.tags as tag}
+					<a
+						href={'/tags/' + tag}
+						class="text-sm text-gray-500 dark:text-gray-200 rounded-2xl bg-white/20 p-1 px-2"
+						>{tag}</a
+					>
+				{/each}
+			{/if}
 		</div>
 		<article class="flex flex-col gap-4">
-			{@html data.page.content}
+			{#if data.page}
+				{@html data.page.content}
+			{/if}
 		</article>
 	</div>
 </div>
