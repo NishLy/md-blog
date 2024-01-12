@@ -10,6 +10,7 @@ export interface Blog {
 	tags: string[];
 	date: Date;
 	readTime: number;
+	userId: string;
 }
 
 const collection = 'blogs';
@@ -19,7 +20,6 @@ export const createBlog = async (blog: Blog) => {
 };
 
 export const getBlog = async (id: string): Promise<Blog> => {
-	console.log('getBlog', db);
 	return new Promise((resolve, reject) => {
 		getDoc(doc(db, collection, id))
 			.then((doc) => {

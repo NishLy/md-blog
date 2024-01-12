@@ -3,6 +3,7 @@ import { error } from '@sveltejs/kit';
 import hljs from 'highlightjs';
 import { markedHighlight } from 'marked-highlight';
 import { getBlog } from '../../../repository/blog';
+import { getUser } from '../../../repository/user';
 
 export const prerender = true;
 
@@ -10,6 +11,7 @@ export const prerender = true;
 export async function load({ params }) {
 	try {
 		const blogData = await getBlog(params.slug);
+		const author = await getUser(blogData.userId);
 
 		const marked = new Marked(
 			markedHighlight({
@@ -34,8 +36,8 @@ export async function load({ params }) {
 					date: blogData.date,
 					readTime: blogData.readTime,
 					author: {
-						name: 'John Doe',
-						avatar: 'https://i.pravatar.cc/300'
+						name: author.displayName,
+						avatar: author.photoURL
 					}
 				}
 			};

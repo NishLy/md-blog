@@ -1,7 +1,46 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { auth } from '$lib/firebase.client';
+	import { session } from '$lib/state/session';
+	import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 	import { onMount } from 'svelte';
 
 	let loggedIn: boolean = false;
+	let photoURL: string = '';
+
+	onMount(() => {
+		session.subscribe((s) => {
+			loggedIn = !!s.loggedIn;
+			photoURL = s.user?.photoURL ?? '';
+			console.log('loggedIn', s.user);
+		});
+	});
+
+	async function loginWithGoogle() {
+		const provider = new GoogleAuthProvider();
+		await signInWithPopup(auth, provider)
+			.then((result) => {
+				const { displayName, email, photoURL, uid } = result?.user;
+
+				const credential = GoogleAuthProvider.credentialFromResult(result);
+				const token = credential?.accessToken;
+
+				console.log('token', token);
+				session.set({
+					loggedIn: true,
+					user: {
+						displayName,
+						email,
+						photoURL,
+						uid
+					}
+				});
+			})
+			.catch((error) => {
+				console.log('error', error);
+				return error;
+			});
+	}
 </script>
 
 <header
@@ -27,11 +66,7 @@
 			<li class="flex items-center ml-auto gap-x-4">
 				{#if loggedIn}
 					<div class="rounded-full w-10 h-10 bg-white/20">
-						<img
-							class="rounded-full w-10 h-10"
-							src="https://avatars.githubusercontent.com/u/55942632?v=4"
-							alt="profile"
-						/>
+						<img class="rounded-full w-10 h-10" src={photoURL} alt="profile" />
 					</div>
 				{:else}
 					<a href="/write">
@@ -39,7 +74,7 @@
 						<span> write </span>
 					</a>
 					<div class="p-1 px-3 rounded-2xl bg-white/10">
-						<a href="/signin"> Log in </a>
+						<button on:click={loginWithGoogle}> Log in </button>
 					</div>
 				{/if}
 			</li>

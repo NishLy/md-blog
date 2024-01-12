@@ -1,4 +1,5 @@
 <script>
+	import { session } from '$lib/state/session';
 	import { onMount } from 'svelte';
 
 	/** @type {import('./$types').PageData} */
@@ -44,11 +45,11 @@
 <div class="flex justify-center">
 	<div class="p-10 flex flex-col gap-6 w-full lg:max-w-4xl">
 		<h1 class="text-4xl font-bold">{data.page?.title}</h1>
-		<div class="flex">
+		<div class="flex items-center">
 			<img
 				src={data.page?.author.avatar}
 				alt={data.page?.author.name}
-				class="rounded-full w-12 h-w-12"
+				class="rounded-full w-12 h-12 flex-shrink-0"
 			/>
 			<div class="flex flex-col justify-center gap-1 ml-2">
 				<span class="text-basess text-gray-300 dark:text-gray-200 font-bold">

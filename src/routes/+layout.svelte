@@ -5,6 +5,8 @@
 	import { session } from '$lib/state/session';
 	import { goto } from '$app/navigation';
 	import Navbar from './_component/navbar.svelte';
+	import { browser } from '$app/environment';
+	import { initializeFirebase } from '$lib/firebase.client';
 
 	export let data;
 
@@ -18,7 +20,6 @@
 
 	onMount(async () => {
 		const user: any = await data.getAuthUser();
-
 		const loggedIn = !!user && user?.emailVerified;
 
 		session.update((cur: any) => {
@@ -30,10 +31,6 @@
 				loading: false
 			};
 		});
-
-		if (loggedIn) {
-			goto('/');
-		}
 	});
 </script>
 
