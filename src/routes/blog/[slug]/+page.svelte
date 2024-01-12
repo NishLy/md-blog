@@ -1,6 +1,37 @@
 <script>
+	import { onMount } from 'svelte';
+
 	/** @type {import('./$types').PageData} */
 	export let data;
+
+	onMount(() => {
+		if (typeof window !== 'undefined') {
+			document.querySelectorAll('.hljs').forEach((block) => {
+				const div = document.createElement('div');
+				div.classList.add(
+					'flex',
+					'justify-end',
+					'text-xs',
+					'text-gray-500',
+					'bg-neutral-300',
+					'rounded-t-2xl',
+					'p-2'
+				);
+				div.innerHTML = `<Button class="text-gray-800"><i class="fa-solid fa-copy"></i> Copy</Button>`;
+				div.addEventListener('click', () => {
+					// @ts-ignore
+					navigator.clipboard.writeText(block.innerText);
+					console.log(navigator.clipboard);
+
+					div.innerHTML = `<Button class="text-green-500"><i class="fa-solid fa-copy"></i> Copied</Button>`;
+					setTimeout(() => {
+						div.innerHTML = `<Button class="text-gray-500"><i class="fa-solid fa-copy"></i> Copy</Button>`;
+					}, 1000);
+				});
+				block.insertAdjacentElement('beforebegin', div);
+			});
+		}
+	});
 </script>
 
 <svelte:head>
@@ -43,12 +74,13 @@
 		</div>
 		<div class="flex gap-2">
 			{#each data.page.tags as tag}
-				<span class="text-sm text-gray-500 dark:text-gray-200 rounded-2xl bg-white/20 p-1 px-2"
-					>{tag}</span
+				<a
+					href={'/tags/' + tag}
+					class="text-sm text-gray-500 dark:text-gray-200 rounded-2xl bg-white/20 p-1 px-2">{tag}</a
 				>
 			{/each}
 		</div>
-		<article class="flex flex-col gap-2">
+		<article class="flex flex-col gap-4">
 			{@html data.page.content}
 		</article>
 	</div>

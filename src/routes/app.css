@@ -35,6 +35,6 @@
 	}
 
 	.hljs {
-		@apply text-sm w-full overflow-auto  rounded-2xl;
+		@apply text-sm w-full overflow-auto bg-white/90 rounded-b-2xl;
 	}
 }
