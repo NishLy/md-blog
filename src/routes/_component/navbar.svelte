@@ -65,11 +65,15 @@
 			</li>
 			<li class="flex items-center ml-auto gap-x-4">
 				{#if loggedIn}
+					<a href="/editor">
+						<i class="fa-solid fa-pen-nib"></i>
+						<span> write </span>
+					</a>
 					<div class="rounded-full w-10 h-10 bg-white/20">
 						<img class="rounded-full w-10 h-10" src={photoURL} alt="profile" />
 					</div>
 				{:else}
-					<a href="/write">
+					<a href="/editor">
 						<i class="fa-solid fa-pen-nib"></i>
 						<span> write </span>
 					</a>

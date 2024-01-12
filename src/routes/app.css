@@ -37,4 +37,8 @@
 	.hljs {
 		@apply text-sm w-full overflow-auto bg-white/90 rounded-b-2xl;
 	}
+
+	.bytemd {
+		height: calc(100vh - 10rem) !important;
+	}
 }
