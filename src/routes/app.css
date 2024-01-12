@@ -41,4 +41,8 @@
 	.bytemd {
 		height: calc(100vh - 10rem) !important;
 	}
+
+	.bytemd-preview .markdown-body {
+		@apply flex flex-col gap-4;
+	}
 }
