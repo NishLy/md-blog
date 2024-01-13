@@ -46,37 +46,40 @@
 	};
 </script>
 
-<div class="flex flex-col justify-center bg-white p-10 gap-2">
-	<form>
-		<h3 class="dark:text-black font-semibold mx-0 m-2">Metadata</h3>
-		<div>
-			<label for="title" class="dark:text-black">Title</label>
+<div class="flex w-full justify-center">
+	<div class="flex flex-col justify-center bg-white p-10 gap-2 w-full">
+		<h1 class="text-black text-center font-bold mb-4">WRITE YOUR PAGE HERE</h1>
+		<form>
+			<h3 class="dark:text-black font-semibold mx-0 m-2">Metadata</h3>
+			<div>
+				<label for="title" class="dark:text-black">Title</label>
+				<input
+					type="text"
+					name="title"
+					placeholder="title"
+					class="w-full p-2 border-2 dark:text-black mb-2"
+				/>
+				<label for="readTime" class="dark:text-black">Read Time</label>
+				<input
+					type="number"
+					name="readTime"
+					placeholder="in minutes"
+					class="w-full p-2 border-2 dark:text-black mb-2"
+				/>
+				<label for="tags" class="dark:text-black">Tags</label>
+				<Tags initialTags={['svelte']} />
+			</div>
+			<h3 class="dark:text-black font-semibold mx-0 m-2">Content</h3>
+			<div id="editor" class="flex flex-col gap-6 w-full lg:max-w-4x box-border mb-4"></div>
+			<label for="title" class="dark:text-black">Upload Markdown Content</label>
 			<input
-				type="text"
-				name="title"
-				placeholder="title"
-				class="w-full p-2 border-2 dark:text-black mb-2"
-			/>
-			<label for="readTime" class="dark:text-black">Read Time</label>
-			<input
-				type="number"
-				name="readTime"
+				type="file"
+				name="md-file"
 				placeholder="in minutes"
-				class="w-full p-2 border-2 dark:text-black mb-2"
+				class="w-full p-2 border-2 dark:text-black mb-10"
+				on:change={onFileUpload}
 			/>
-			<label for="tags" class="dark:text-black">Tags</label>
-			<Tags initialTags={['svelte']} />
-		</div>
-		<h3 class="dark:text-black font-semibold mx-0 m-2">Content</h3>
-		<div id="editor" class="flex flex-col gap-6 w-full lg:max-w-4x box-border mb-4"></div>
-		<label for="title" class="dark:text-black">Upload Markdown Content</label>
-		<input
-			type="file"
-			name="md-file"
-			placeholder="in minutes"
-			class="w-full p-2 border-2 dark:text-black mb-10"
-			on:change={onFileUpload}
-		/>
-		<button class="w-full p-2 border-2 dark:text-black mb-2">Publish</button>
-	</form>
+			<button class="w-full p-2 border-2 dark:text-black mb-2">Publish</button>
+		</form>
+	</div>
 </div>
