@@ -5,10 +5,16 @@
 	import { Editor, Viewer } from 'bytemd';
 	import { onMount } from 'svelte';
 	import Tags from '../_component/tags.svelte';
-	import type { ChangeEventHandler } from 'svelte/elements';
+	import type { ChangeEventHandler, FormEventHandler } from 'svelte/elements';
+	import { session, type User } from '$lib/state/session';
 
 	let editor: any;
 	let value = '# Hello, Worlld!';
+	let user: User | null = null;
+
+	session.subscribe((value) => {
+		value?.user && (user = value.user);
+	});
 
 	onMount(() => {
 		if (browser) {
@@ -21,6 +27,7 @@
 			});
 
 			editor.$on('change', (e: any) => {
+				value = e.detail.value;
 				editor.$set({ value: e.detail.value });
 			});
 		}
@@ -32,28 +39,59 @@
 		const file = target.files![0];
 
 		if (!file) return;
-		console.log(file);
 		if (file.type !== '') return alert('Please upload a markdown file');
 
 		const reader = new FileReader();
 
 		reader.onload = (ev) => {
 			if (!ev.target) return;
+			value = ev.target!.result as string;
 			editor.$set({ value: ev.target!.result });
 		};
 
 		reader.readAsText(file);
+	};
+
+	const onSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
+		e.preventDefault();
+
+		if (!e.target || !editor) return;
+
+		const data = new FormData(e.target as HTMLFormElement);
+		const title = data.get('title');
+		const readTime = data.get('readTime');
+		const tags = data.get('tags');
+		const content = value;
+
+		const userId = user?.uid;
+
+		if (!title || !readTime || !tags || !content || !user) return;
+
+		try {
+			await fetch('/api/page', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ title, readTime, tags, content, userId })
+			});
+
+			alert('Page created successfully');
+		} catch (e) {
+			console.log(e);
+		}
 	};
 </script>
 
 <div class="flex w-full justify-center">
 	<div class="flex flex-col justify-center bg-white p-10 gap-2 w-full">
 		<h1 class="text-black text-center font-bold mb-4">WRITE YOUR PAGE HERE</h1>
-		<form>
+		<form on:submit={onSubmit}>
 			<h3 class="dark:text-black font-semibold mx-0 m-2">Metadata</h3>
 			<div>
 				<label for="title" class="dark:text-black">Title</label>
 				<input
+					required
 					type="text"
 					name="title"
 					placeholder="title"
@@ -63,6 +101,7 @@
 				<input
 					type="number"
 					name="readTime"
+					required
 					placeholder="in minutes"
 					class="w-full p-2 border-2 dark:text-black mb-2"
 				/>

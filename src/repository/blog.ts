@@ -1,5 +1,5 @@
 import { db } from '$lib/firebase.client';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, addDoc, collection } from 'firebase/firestore';
 
 export interface Blog {
 	id: string;
@@ -8,20 +8,21 @@ export interface Blog {
 	likesCount: number;
 	commentsCount: number;
 	tags: string[];
-	date: Date;
+	date: string;
 	readTime: number;
 	userId: string;
+	isPublished: boolean;
 }
 
-const collection = 'blogs';
+const collectionName = 'blogs';
 
-export const createBlog = async (blog: Blog) => {
-	return await setDoc(doc(db, collection, blog.id), blog);
+export const createBlog = async (blog: Omit<Blog, 'id'>) => {
+	return await addDoc(collection(db, collectionName), blog);
 };
 
 export const getBlog = async (id: string): Promise<Blog> => {
 	return new Promise((resolve, reject) => {
-		getDoc(doc(db, collection, id))
+		getDoc(doc(db, collectionName, id))
 			.then((doc) => {
 				if (doc.exists()) {
 					resolve(doc.data() as Blog);
@@ -38,7 +39,7 @@ export const getBlog = async (id: string): Promise<Blog> => {
 
 export const getAllBlogs = async () => {
 	return new Promise((resolve, reject) => {
-		getDoc(doc(db, collection))
+		getDoc(doc(db, collectionName))
 			.then((doc) => {
 				if (doc.exists()) {
 					resolve(doc.data());
