@@ -51,4 +51,82 @@
 	.bytemd-preview .markdown-body {
 		@apply flex flex-col gap-4;
 	}
+
+	.summary > h1 {
+		font-size: inherit;
+		margin: 0;
+		line-height: unset;
+	}
+
+	.summary > h2 {
+		font-size: inherit;
+		margin: 0;
+		line-height: unset;
+	}
+
+	.summary > h3 {
+		font-size: inherit;
+		margin: 0;
+		line-height: unset;
+	}
+
+	.summary > h4 {
+		font-size: inherit;
+		margin: 0;
+		line-height: unset;
+	}
+
+	.summary > h5 {
+		font-size: inherit;
+		margin: 0;
+		line-height: unset;
+	}
+
+	.summary > h6 {
+		font-size: inherit;
+		margin: 0;
+		line-height: unset;
+	}
+
+	.summary > p {
+		font-size: inherit;
+		margin: 0;
+		line-height: unset;
+	}
+
+	.summary > code {
+		font-size: inherit;
+		margin: 0;
+		line-height: unset;
+	}
+
+	.summary > div {
+		font-size: inherit;
+		margin: 0;
+		line-height: unset;
+	}
+
+	.summary > a {
+		font-size: inherit;
+		margin: 0;
+		line-height: unset;
+	}
+
+	.summary > ul {
+		font-size: inherit;
+		margin: 0;
+		line-height: unset;
+	}
+
+	.summary > ol {
+		font-size: inherit;
+		margin: 0;
+		line-height: unset;
+	}
+
+	.summary > li {
+		font-size: inherit;
+		margin: 0;
+		line-height: unset;
+	}
 }

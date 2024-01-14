@@ -4,7 +4,7 @@
 	import { browser } from '$app/environment';
 	import { Editor, Viewer } from 'bytemd';
 	import { onMount } from 'svelte';
-	import Tags from '../_component/tags.svelte';
+	import Tags from '../../lib/components/tags.svelte';
 	import type { ChangeEventHandler, FormEventHandler } from 'svelte/elements';
 	import { session, type User } from '$lib/state/session';
 	import { goto } from '$app/navigation';

@@ -4,7 +4,7 @@ import { getDoc, doc, setDoc } from 'firebase/firestore';
 const collection = 'users';
 
 export interface User {
-	id: string;
+	uid: string;
 	displayName: string;
 	email: string;
 	followers: number;
@@ -12,7 +12,7 @@ export interface User {
 	photoURL: string;
 }
 
-export const createUser = async (user: Omit<User, 'id'>) => {
+export const createUser = async (user: Omit<User, 'uid'>) => {
 	return await setDoc(doc(db, collection), user);
 };
 

@@ -3,10 +3,7 @@
 	import './app.css';
 	import { onMount } from 'svelte';
 	import { session } from '$lib/state/session';
-	import { goto } from '$app/navigation';
-	import Navbar from './_component/navbar.svelte';
-	import { browser } from '$app/environment';
-	import { initializeFirebase } from '$lib/firebase.client';
+	import Navbar from '$lib/components/navbar.svelte';
 
 	export let data;
 
