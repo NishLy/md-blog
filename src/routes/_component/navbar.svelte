@@ -25,7 +25,6 @@
 				const credential = GoogleAuthProvider.credentialFromResult(result);
 				const token = credential?.accessToken;
 
-				console.log('token', token);
 				session.set({
 					loggedIn: true,
 					user: {
@@ -37,7 +36,6 @@
 				});
 			})
 			.catch((error) => {
-				console.log('error', error);
 				return error;
 			});
 	}

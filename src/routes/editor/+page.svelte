@@ -7,28 +7,59 @@
 	import Tags from '../_component/tags.svelte';
 	import type { ChangeEventHandler, FormEventHandler } from 'svelte/elements';
 	import { session, type User } from '$lib/state/session';
+	import { goto } from '$app/navigation';
 
 	let editor: any;
-	let value = '# Hello, Worlld!';
 	let user: User | null = null;
+
+	let content: string;
+	let title: string;
+	let readTime: number;
+	let tags: string[] = [];
 
 	session.subscribe((value) => {
 		value?.user && (user = value.user);
 	});
 
+	$: (() => {
+		if (!content || !title || !readTime || !tags) return;
+		localStorage.setItem(
+			'content-unsaved',
+			JSON.stringify({
+				content,
+				title,
+				readTime,
+				tags
+			})
+		);
+	})();
+
 	onMount(() => {
 		if (browser) {
+			if (localStorage.getItem('content-unsaved')) {
+				const data = JSON.parse(localStorage.getItem('content-unsaved')!);
+				content = data.content;
+				title = data.title;
+				readTime = data.readTime;
+				tags = data.tags;
+			}
+
 			editor = new Editor({
 				target: document.getElementById('editor')!,
 				props: {
-					value,
+					value: content,
 					plugins: [gfm()]
 				}
 			});
 
 			editor.$on('change', (e: any) => {
-				value = e.detail.value;
+				content = e.detail.value;
 				editor.$set({ value: e.detail.value });
+			});
+
+			window.addEventListener('beforeunload', (e) => {
+				e.preventDefault();
+				e.returnValue = '';
 			});
 		}
 	});
@@ -45,7 +76,7 @@
 
 		reader.onload = (ev) => {
 			if (!ev.target) return;
-			value = ev.target!.result as string;
+			content = ev.target!.result as string;
 			editor.$set({ value: ev.target!.result });
 		};
 
@@ -61,7 +92,6 @@
 		const title = data.get('title');
 		const readTime = data.get('readTime');
 		const tags = data.get('tags');
-		const content = value;
 
 		const userId = user?.uid;
 
@@ -76,7 +106,9 @@
 				body: JSON.stringify({ title, readTime, tags, content, userId })
 			});
 
-			alert('Page created successfully');
+			localStorage.removeItem('content-unsaved');
+
+			goto(`/user/${user.uid}`);
 		} catch (e) {
 			console.log(e);
 		}
@@ -94,6 +126,8 @@
 					required
 					type="text"
 					name="title"
+					value={title}
+					on:input={(e) => (title = e.currentTarget.value)}
 					placeholder="title"
 					class="w-full p-2 border-2 dark:text-black mb-2"
 				/>
@@ -102,11 +136,13 @@
 					type="number"
 					name="readTime"
 					required
+					value={readTime}
+					on:input={(e) => (readTime = parseInt(e.currentTarget.value ?? '0'))}
 					placeholder="in minutes"
 					class="w-full p-2 border-2 dark:text-black mb-2"
 				/>
 				<label for="tags" class="dark:text-black">Tags</label>
-				<Tags initialTags={['svelte']} />
+				<Tags allTags={['svelte']} initialTags={tags} onChange={(tags) => (tags = tags)} />
 			</div>
 			<h3 class="dark:text-black font-semibold mx-0 m-2">Content</h3>
 			<div id="editor" class="flex flex-col gap-6 w-full lg:max-w-4x box-border mb-4"></div>
