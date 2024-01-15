@@ -64,12 +64,18 @@ export const getAllBlogByTag = async (tag: string): Promise<{ post: Blog; user: 
 					const loadedUsers: Record<string, User> = {};
 
 					snapshot.forEach((doc) => {
-						loadedUsers[doc.id] = doc.data() as User;
+						loadedUsers[doc.id] = {
+							uid: doc.id,
+							...(doc.data() as Omit<User, 'uid'>)
+						};
 					});
 
 					snapshotBlog.forEach((docBlog) => {
 						const data = {
-							post: docBlog.data() as Blog,
+							post: {
+								id: docBlog.id,
+								...(docBlog.data() as Omit<Blog, 'id'>)
+							},
 							user: loadedUsers[docBlog.data().userId] as User
 						};
 

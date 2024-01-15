@@ -28,6 +28,15 @@
 				loading: false
 			};
 		});
+
+		try {
+			const data = await fetch('/api/user/' + user?.uid);
+
+			const res = await data.json();
+			console.log(res);
+		} catch (e) {
+			console.log(e);
+		}
 	});
 </script>
 

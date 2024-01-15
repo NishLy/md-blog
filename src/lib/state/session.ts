@@ -14,3 +14,13 @@ export type SessionState = {
 };
 
 export const session = <Writable<SessionState>>writable();
+
+export type UserData = {
+	email: string;
+	displayName: string;
+	photoURL: string;
+	uid: string;
+	bookmarks: string[];
+};
+
+export const userDataSession = <Writable<UserData>>writable();
