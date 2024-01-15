@@ -4,15 +4,17 @@
 	import { session } from '$lib/state/session';
 	import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 
 	let loggedIn: boolean = false;
 	let photoURL: string = '';
 
 	onMount(() => {
+		if (!browser) return;
 		session.subscribe((s) => {
+			if (!s) return;
 			loggedIn = !!s.loggedIn;
 			photoURL = s.user?.photoURL ?? '';
-			console.log('loggedIn', s.user);
 		});
 	});
 

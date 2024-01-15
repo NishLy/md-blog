@@ -10,7 +10,6 @@ export async function GET({ params }: RequestEvent) {
 			});
 		}
 
-		console.log(params);
 		const user = await getUser(params.slug);
 
 		return new Response(JSON.stringify(user), {

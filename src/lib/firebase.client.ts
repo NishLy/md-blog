@@ -2,7 +2,7 @@
 import { initializeApp, type FirebaseApp } from 'firebase/app';
 import { getAnalytics, type Analytics } from 'firebase/analytics';
 import { browser } from '$app/environment';
-import { type Auth, getAuth, connectAuthEmulator } from 'firebase/auth';
+import { type Auth, getAuth } from 'firebase/auth';
 import { getFirestore, type Firestore } from 'firebase/firestore';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -31,14 +31,8 @@ export const initializeFirebase = () => {
 
 	if (!browser) {
 		db = getFirestore(app);
-		throw new Error("Can't use the Firebase client on the server.");
 	} else {
 		auth = getAuth(app);
 		analytics = getAnalytics(app);
-		if (firebaseConfig.useEmulator) {
-			connectAuthEmulator(auth, 'http://127.0.0.1:9099');
-		}
 	}
-
-	console.log(db);
 };

@@ -4,45 +4,83 @@
 	import type { User } from '../../repository/user';
 	import { printRelativeTime } from '../../utils/date';
 	import { browser } from '$app/environment';
-	import { session } from '$lib/state/session';
-
-	let userCredentials;
-
-	onMount(async () => {
-		if (browser) return;
-
-		session.subscribe((cur: any) => {
-			userCredentials = cur;
-		});
-	});
+	import { session, userDataStore, type SessionState } from '$lib/state/session';
+	import { goto } from '$app/navigation';
 
 	export let user: User;
 	export let post: Blog;
+
+	let userData: User;
+	let sessionData: SessionState;
+	let isOnBookmark: boolean = false;
+
+	session.subscribe((cur: any) => {
+		sessionData = cur;
+	});
+
+	userDataStore.subscribe((cur: any) => {
+		userData = cur;
+		isOnBookmark = !!userData?.bookmarks.includes(post.id);
+		console.log(userData);
+	});
+
+	$: (() => {
+		if (!userData || !userData.bookmarks) return;
+	})();
+
+	onMount(async () => {
+		if (browser) return;
+	});
+
+	function toggleBookmark(idPost: string) {
+		if (!sessionData.loggedIn || !sessionData.user) {
+			return goto('/login');
+		}
+
+		try {
+			const res = fetch('/api/bookmark/post/' + post.id, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					uid: sessionData.user.uid
+				})
+			});
+
+			isOnBookmark = !isOnBookmark;
+		} catch (e) {
+			console.log(e);
+		}
+	}
 </script>
 
 <div class="flex flex-col gap-3 justify-start">
-	<img
-		src="https://avatars.githubusercontent.com/u/54907004?v=4"
-		alt="Thumbnail"
-		class="w-full aspect-video h-48 object-cover"
-	/>
-	<div class="flex items-center">
+	<a href={'/page/' + post.id} class="flex flex-col gap-4">
 		<img
 			src="https://avatars.githubusercontent.com/u/54907004?v=4"
-			alt="Svelte Society"
-			class="rounded-full w-6 h-6 flex-shrink-0"
+			alt="Thumbnail"
+			class="w-full aspect-video h-48 object-cover"
 		/>
-		<div class="flex flex-col justify-center gap-1 ml-2">
-			<a href={'/user/' + user.uid} class="text-sm text-gray-300 dark:text-gray-200 font-bold">
-				{user.displayName} ·
-				<!-- <a href={'/follow/user/' + user.uid} class="opacity-80"> Follow </a> -->
-			</a>
+		<div class="flex items-center">
+			<img
+				src="https://avatars.githubusercontent.com/u/54907004?v=4"
+				alt="Svelte Society"
+				class="rounded-full w-6 h-6 flex-shrink-0"
+			/>
+			<div class="flex flex-col justify-center gap-1 ml-2">
+				<a href={'/user/' + user.uid} class="text-sm text-gray-300 dark:text-gray-200 font-bold">
+					{user.displayName} ·
+					<!-- <a href={'/follow/user/' + user.uid} class="opacity-80"> Follow </a> -->
+				</a>
+			</div>
 		</div>
-	</div>
-	<h3 class="font-bold mt-2">{post.title}</h3>
-	<div class="summary dark:text-neutral-400 text-neutral-800">
-		{@html post.content}
-	</div>
+		<h3 class="font-bold mt-2">{post.title}</h3>
+		<div class="summary dark:text-neutral-400 text-neutral-800 min-h-8">
+			{@html post.content}
+		</div>
+	</a>
+
 	<span class="text-sm text-gray-300 dark:text-neutral-200">
 		{post.readTime} min read · {printRelativeTime(new Date(post.date))}
 	</span>
@@ -57,9 +95,19 @@
 				<span>{post.commentsCount}</span>
 			</div>
 		</div>
-		<a href={'/bookmark/post/' + post.id}>
-			<i class="fa-regular fa-bookmark"></i>
-		</a>
+		<button
+			type="button"
+			on:click={(e) => {
+				e.stopPropagation();
+				toggleBookmark(post.id);
+			}}
+		>
+			{#if isOnBookmark}
+				<i class="fa-solid fa-bookmark"></i>
+			{:else}
+				<i class="fa-regular fa-bookmark"></i>
+			{/if}
+		</button>
 	</div>
 </div>
 
