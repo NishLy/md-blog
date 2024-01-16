@@ -23,6 +23,7 @@
 
 	async function toogleFollow() {
 		if (!browser) return;
+		if (!(await data.invokeProtected(`Never miss a story about ${data.props?.tag.name}`))) return;
 		try {
 			const user: any = await data.getAuthUser();
 

@@ -20,7 +20,7 @@
 
 	userDataStore.subscribe((cur: any) => {
 		userData = cur;
-		isOnBookmark = !!userData?.bookmarks.includes(post.id);
+		isOnBookmark = !!userData?.bookmarks?.includes(post.id);
 	});
 
 	$: (() => {

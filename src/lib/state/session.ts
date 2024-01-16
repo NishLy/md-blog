@@ -24,3 +24,15 @@ export type UserData = {
 };
 
 export const userDataStore = <Writable<UserData | null>>writable();
+
+export type Logged = {
+	isLogged: boolean;
+	isInvokingProtected: boolean;
+	lastMessage: string;
+};
+
+export const logged = <Writable<Logged>>writable({
+	isLogged: false,
+	isInvokingProtected: false,
+	lastMessage: ''
+});
