@@ -1,4 +1,4 @@
-import { createBlog } from '../../../repository/blog';
+import { createBlog } from '../../../lib/repository/blog';
 
 export async function POST(event) {
 	const data = await event.request.json();

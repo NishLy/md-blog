@@ -26,8 +26,7 @@ export const toggleBookmark = async (uid: string, bookmarkId: string) => {
 					resolve('success');
 				} else {
 					setDoc(doc(db, collectionName, uid, 'bookmarks', bookmarkId), { createdAt: new Date() })
-						.then((e) => {
-							console.log(e);
+						.then(() => {
 							resolve('success');
 						})
 						.catch((error) => {

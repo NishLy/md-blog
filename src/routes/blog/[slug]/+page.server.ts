@@ -2,8 +2,8 @@ import { Marked } from 'marked';
 import { error } from '@sveltejs/kit';
 import hljs from 'highlightjs';
 import { markedHighlight } from 'marked-highlight';
-import { getBlog } from '../../../repository/blog';
-import { getUser } from '../../../repository/user';
+import { getBlog } from '../../../lib/repository/blog';
+import { getUser } from '../../../lib/repository/user';
 
 export const prerender = true;
 

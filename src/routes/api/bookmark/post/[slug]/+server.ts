@@ -1,4 +1,4 @@
-import { toggleBookmark } from '../../../../../repository/user';
+import { toggleBookmark } from '../../../../../lib/repository/user';
 
 export async function POST({ params, request }) {
 	try {

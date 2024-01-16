@@ -1,4 +1,4 @@
-import { getUser } from '../../../../repository/user';
+import { getUser } from '../../../../lib/repository/user';
 import type { RequestEvent } from '../../page/$types';
 
 export async function GET({ params }: RequestEvent) {

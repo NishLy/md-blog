@@ -1,6 +1,6 @@
 import { marked } from 'marked';
-import { getAllBlogByTag } from '../../../repository/blog';
-import { getTag } from '../../../repository/tags';
+import { getAllBlogByTag } from '../../../lib/repository/blog';
+import { getTag } from '../../../lib/repository/tags';
 
 export const prerender = true;
 
