@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { Blog } from '../../repository/blog';
-	import type { User } from '../../repository/user';
-	import { printRelativeTime } from '../../utils/date';
+	import type { Blog } from '../repository/blog';
+	import type { User } from '../repository/user';
+	import { printRelativeTime } from '../utils/date';
 	import { browser } from '$app/environment';
 	import { session, userDataStore, type SessionState } from '$lib/state/session';
 	import { goto } from '$app/navigation';
@@ -21,7 +21,6 @@
 	userDataStore.subscribe((cur: any) => {
 		userData = cur;
 		isOnBookmark = !!userData?.bookmarks.includes(post.id);
-		console.log(userData);
 	});
 
 	$: (() => {

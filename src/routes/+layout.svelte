@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 	import { session, userDataStore } from '$lib/state/session';
 	import Navbar from '$lib/components/navbar.svelte';
-	import type { User } from '../repository/user';
+	import type { User } from '$lib/repository/user';
 
 	export let data;
 

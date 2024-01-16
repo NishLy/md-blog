@@ -21,11 +21,7 @@ export async function load({ params }) {
 
 	return {
 		props: {
-			tag: {
-				name: tag.name,
-				followers: tag.followers,
-				count: posts.length
-			},
+			tag,
 			posts
 		}
 	};

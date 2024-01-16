@@ -1,5 +1,5 @@
 import { db } from '$lib/firebase.client';
-import { collection, deleteDoc, doc, getDoc, query, setDoc, where } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, limit, query, where } from 'firebase/firestore';
 import { getDocs } from 'firebase/firestore';
 
 const collectionName = 'tags';
@@ -28,14 +28,19 @@ export const getAllTags = async (): Promise<Tag[]> => {
 	});
 };
 
-export const getTag = async (name: string): Promise<Tag> => {
-	return new Promise<Tag>((resolve, reject) => {
+export const getTag = async (
+	name: string
+): Promise<{ id: string; name: string; followers: number; count: number }> => {
+	return new Promise((resolve, reject) => {
 		const q = query(collection(db, collectionName), where('name', '==', name));
 		getDocs(q)
 			.then((snapshot) => {
 				if (snapshot.size > 0) {
 					snapshot.forEach((doc) => {
-						return resolve(doc.data() as Tag);
+						return resolve({
+							id: doc.id,
+							...(doc.data() as Tag)
+						});
 					});
 				}
 
@@ -49,19 +54,47 @@ export const getTag = async (name: string): Promise<Tag> => {
 
 export const toggleFollow = async (tagId: string, uid: string) => {
 	return new Promise((resolve, reject) => {
-		getDoc(doc(db, collectionName, tagId, 'followers', uid))
+		const q = query(
+			collection(db, 'tags-followers'),
+			where('uid', '==', uid),
+			where('tagId', '==', tagId),
+			limit(1)
+		);
+		getDocs(q)
 			.then((docSnap) => {
-				if (docSnap.exists()) {
-					deleteDoc(doc(db, collectionName, tagId, 'followers', uid));
+				if (docSnap.size > 0) {
+					deleteDoc(doc(db, 'tags-followers', docSnap.docs[0].id));
 					resolve('success');
 				} else {
-					setDoc(doc(db, collectionName, tagId, 'followers', uid), { createdAt: new Date() })
+					addDoc(collection(db, 'tags-followers'), { uid, tagId })
 						.then(() => {
 							resolve('success');
 						})
 						.catch((error) => {
 							reject(error);
 						});
+				}
+			})
+			.catch((error) => {
+				reject(error);
+			});
+	});
+};
+
+export const getFollower = async (tagId: string, uid: string): Promise<boolean> => {
+	return new Promise((resolve, reject) => {
+		const q = query(
+			collection(db, 'tags-followers'),
+			where('uid', '==', uid),
+			where('tagId', '==', tagId),
+			limit(1)
+		);
+		getDocs(q)
+			.then((docSnap) => {
+				if (docSnap.size > 0) {
+					resolve(true);
+				} else {
+					resolve(false);
 				}
 			})
 			.catch((error) => {
