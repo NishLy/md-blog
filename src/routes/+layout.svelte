@@ -2,7 +2,7 @@
 	/** @type {import('./$types').PageData} */
 	import './app.css';
 	import { onMount } from 'svelte';
-	import { session, userDataStore } from '$lib/state/session';
+	import { logged, session, userDataStore } from '$lib/state/session';
 	import Navbar from '$lib/components/navbar.svelte';
 	import type { User } from '$lib/repository/user';
 	import Sidemenu from '$lib/components/Sidemenu.svelte';
@@ -29,6 +29,14 @@
 					...res
 				};
 			});
+
+			logged.update((cur) => {
+				return {
+					lastMessage: '',
+					isInvokingProtected: false,
+					isLogged: loggedIn
+				};
+			});
 		} catch (e) {
 			console.log(e);
 		}
@@ -40,7 +48,7 @@
 
 	onMount(async () => {
 		const user: any = await data.getAuthUser();
-		const loggedIn = !!user && user?.emailVerified;
+		const loggedIn = !!user && !user.isAnonymous;
 
 		session.update((cur: any) => {
 			loading = false;

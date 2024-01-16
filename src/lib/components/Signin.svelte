@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { logged, type Logged } from '$lib/state/session';
+	import { loginWith, Provider } from '$lib/utils/login';
 
 	let userLogged: Logged = {
 		isLogged: false,
@@ -40,14 +41,33 @@
 				<i class="fa-solid fa-x"></i>
 			</button>
 			<h1 class="mb-6 font-bold text-center">{userLogged.lastMessage}</h1>
-			<div class="flex gap-4 bg-white p-2 px-4 rounded-3xl dark:text-black items-center w-64">
+			<button
+				on:click={() => {
+					loginWith(Provider.Google);
+				}}
+				class="flex gap-4 bg-white p-2 px-4 rounded-3xl dark:text-black items-center w-64"
+			>
 				<i class="fa-brands fa-google"></i>
 				<span>Sign In With Google</span>
-			</div>
-			<div class="flex gap-4 bg-white p-2 px-4 rounded-3xl dark:text-black items-center w-64">
+			</button>
+			<button
+				on:click={() => {
+					loginWith(Provider.Facebook);
+				}}
+				class="flex gap-4 bg-white p-2 px-4 rounded-3xl dark:text-black items-center w-64"
+			>
 				<i class="fa-brands fa-facebook"></i>
 				<span>Sign In With Facebook</span>
-			</div>
+			</button>
+			<button
+				on:click={() => {
+					loginWith(Provider.Github);
+				}}
+				class="flex gap-4 bg-white p-2 px-4 rounded-3xl dark:text-black items-center w-64"
+			>
+				<i class="fa-brands fa-github"></i>
+				<span>Sign In With Github</span>
+			</button>
 
 			<p class="mt-6 text-center text-neutral-300">
 				Click “Sign up” to agree to Page Terms of Service and acknowledge that Page Privacy Policy

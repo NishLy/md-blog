@@ -18,30 +18,6 @@
 			photoURL = s.user?.photoURL ?? '';
 		});
 	});
-
-	async function loginWithGoogle() {
-		const provider = new GoogleAuthProvider();
-		await signInWithPopup(auth, provider)
-			.then((result) => {
-				const { displayName, email, photoURL, uid } = result?.user;
-
-				const credential = GoogleAuthProvider.credentialFromResult(result);
-				const token = credential?.accessToken;
-
-				session.set({
-					loggedIn: true,
-					user: {
-						displayName,
-						email,
-						photoURL,
-						uid
-					}
-				});
-			})
-			.catch((error) => {
-				return error;
-			});
-	}
 </script>
 
 <header
