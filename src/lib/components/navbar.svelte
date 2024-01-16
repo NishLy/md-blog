@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { auth } from '$lib/firebase.client';
-	import { session } from '$lib/state/session';
+	import { session, type User, type UserData } from '$lib/state/session';
 	import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
+	import Sidemenu from './Sidemenu.svelte';
+	import { sidemenu } from '$lib/state/sidemenu';
 
 	let loggedIn: boolean = false;
 	let photoURL: string = '';
@@ -69,8 +71,18 @@
 						<i class="fa-solid fa-pen-nib"></i>
 						<span> write </span>
 					</a>
-					<div class="rounded-full w-10 h-10 bg-white/20">
-						<img class="rounded-full w-10 h-10" src={photoURL} alt="profile" />
+					<div class="rounded-full w-10 h-10 bg-white/20 md:relative lg:relative">
+						<button
+							on:click={() => {
+								sidemenu.update((s) => {
+									s.isOpen = !s.isOpen;
+									return s;
+								});
+							}}
+						>
+							<img class="rounded-full w-10 h-10" src={photoURL} alt="profile" />
+						</button>
+					
 					</div>
 				{:else}
 					<a href="/editor">

@@ -23,4 +23,4 @@ export type UserData = {
 	bookmarks: string[];
 };
 
-export const userDataStore = <Writable<UserData>>writable();
+export const userDataStore = <Writable<UserData | null>>writable();

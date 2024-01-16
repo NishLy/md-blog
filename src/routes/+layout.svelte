@@ -5,6 +5,7 @@
 	import { session, userDataStore } from '$lib/state/session';
 	import Navbar from '$lib/components/navbar.svelte';
 	import type { User } from '$lib/repository/user';
+	import Sidemenu from '$lib/components/Sidemenu.svelte';
 
 	export let data;
 
@@ -55,6 +56,7 @@
 {#if loading}
 	<div>Loading...</div>
 {:else}
+	<Sidemenu />
 	<div class="dark:bg-dark-primary dark:text-white min-h-screen">
 		<Navbar />
 		<!-- Logged in: {loggedIn} -->
