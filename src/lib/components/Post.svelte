@@ -9,6 +9,7 @@
 
 	export let user: User;
 	export let post: Blog;
+	export let signInInvoker: (message: string) => Promise<boolean>;
 
 	let userData: User;
 	let sessionData: SessionState;
@@ -31,13 +32,17 @@
 		if (browser) return;
 	});
 
-	function toggleBookmark(idPost: string) {
+	async function toggleBookmark(idPost: string) {
+		if (!browser) return;
+
+		if (!(await signInInvoker('Sign in to bookmark this post'))) return;
+
 		if (!sessionData.loggedIn || !sessionData.user) {
-			return goto('/login');
+			return goto('/signin');
 		}
 
 		try {
-			const res = fetch('/api/bookmark/post/' + post.id, {
+			const res = await fetch('/api/bookmark/post/' + post.id, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'

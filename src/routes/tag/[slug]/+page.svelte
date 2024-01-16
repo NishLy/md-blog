@@ -57,7 +57,7 @@
 	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
 		{#if data.props}
 			{#each data.props?.posts as post}
-				<Post user={post.user} post={post.post} />
+				<Post signInInvoker={data.invokeProtected} user={post.user} post={post.post} />
 			{/each}
 		{/if}
 	</div>

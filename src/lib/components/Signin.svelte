@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
 	import { logged, type Logged } from '$lib/state/session';
 
 	let userLogged: Logged = {
@@ -8,6 +9,12 @@
 	};
 
 	logged.subscribe((cur) => {
+		if (!browser) return;
+		if (!cur.isLogged && cur.isInvokingProtected) {
+			document.body.style.overflow = 'hidden';
+		} else {
+			document.body.style.overflow = 'auto';
+		}
 		userLogged = cur;
 	});
 </script>

@@ -1,15 +1,14 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
 	import { auth } from '$lib/firebase.client';
 	import { session, type User, type UserData } from '$lib/state/session';
 	import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
-	import Sidemenu from './Sidemenu.svelte';
 	import { sidemenu } from '$lib/state/sidemenu';
 
 	let loggedIn: boolean = false;
 	let photoURL: string = '';
+	export let signInInvoker: (message: string) => Promise<boolean>;
 
 	onMount(() => {
 		if (!browser) return;
@@ -82,15 +81,24 @@
 						>
 							<img class="rounded-full w-10 h-10" src={photoURL} alt="profile" />
 						</button>
-					
 					</div>
 				{:else}
-					<a href="/editor">
+					<button
+						on:click={async () => {
+							if (!(await signInInvoker('Create an account to start writting'))) return;
+						}}
+					>
 						<i class="fa-solid fa-pen-nib"></i>
 						<span> write </span>
-					</a>
+					</button>
 					<div class="p-1 px-3 rounded-2xl bg-white/10">
-						<button on:click={loginWithGoogle}> Log in </button>
+						<button
+							on:click={async () => {
+								if (!(await signInInvoker('Sign in to explore more'))) return;
+							}}
+						>
+							Sign in
+						</button>
 					</div>
 				{/if}
 			</li>

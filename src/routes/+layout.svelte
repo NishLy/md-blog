@@ -58,7 +58,7 @@
 	<div>Loading...</div>
 {:else}
 	<div class="dark:bg-dark-primary dark:text-white min-h-screen">
-		<Navbar />
+		<Navbar signInInvoker={data.invokeProtected} />
 		<!-- Logged in: {loggedIn} -->
 		<slot />
 	</div>
