@@ -40,6 +40,59 @@ export const toggleBookmark = async (uid: string, bookmarkId: string) => {
 	});
 };
 
+export const checkUserExists = async (id: string): Promise<boolean> => {
+	return new Promise((resolve, reject) => {
+		getDoc(doc(db, collectionName, id))
+			.then((docSnap) => {
+				if (docSnap.exists()) {
+					resolve(true);
+				} else {
+					resolve(false);
+				}
+			})
+			.catch((error) => {
+				reject(error);
+			});
+	});
+};
+
+export const addUser = async (
+	user: Partial<User> & { uid: string }
+): Promise<{
+	success: boolean;
+	isNewEntry: boolean;
+}> => {
+	return new Promise((resolve, reject) => {
+		checkUserExists(user.uid).then((exists) => {
+			if (exists) {
+				return resolve({
+					success: true,
+					isNewEntry: false
+				});
+			} else {
+				setDoc(doc(db, collectionName, user.uid), {
+					...user,
+					followers: 0,
+					following: 0
+				})
+					.then(() => {
+						setDoc(doc(db, collectionName, user.uid, 'bookmarks', 'default'), {
+							createdAt: new Date()
+						});
+
+						return resolve({
+							success: true,
+							isNewEntry: true
+						});
+					})
+					.catch((error) => {
+						reject(error);
+					});
+			}
+		});
+	});
+};
+
 export const getUser = async (id: string): Promise<User> => {
 	return new Promise((resolve, reject) => {
 		getDoc(doc(db, collectionName, id))

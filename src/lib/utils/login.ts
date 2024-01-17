@@ -10,6 +10,7 @@ import {
 	type UserCredential,
 	type User
 } from 'firebase/auth';
+import { fetchApi } from './httpWrapper';
 
 export async function loginWith(providerName: Provider) {
 	const provider = getProvider(providerName);
@@ -29,15 +30,32 @@ export async function loginWith(providerName: Provider) {
 				displayName = user.reloadUserInfo?.screenName || displayName;
 			}
 
-			session.set({
-				loggedIn: true,
-				user: {
+			fetchApi(`/api/user`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
 					displayName,
 					email,
 					photoURL,
 					uid
-				}
-			});
+				})
+			})
+				.then(() => {
+					session.set({
+						loggedIn: true,
+						user: {
+							displayName,
+							email,
+							photoURL,
+							uid
+						}
+					});
+				})
+				.catch(() => {
+					console.error('Error while creating user');
+				});
 		})
 		.catch((error) => {
 			return error;
