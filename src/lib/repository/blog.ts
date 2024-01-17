@@ -1,5 +1,17 @@
 import { db } from '$lib/firebase.client';
-import { doc, getDoc, addDoc, collection, getDocs } from 'firebase/firestore';
+import {
+	doc,
+	getDoc,
+	addDoc,
+	collection,
+	getDocs,
+	query,
+	where,
+	startAfter,
+	limit,
+	orderBy,
+	DocumentSnapshot
+} from 'firebase/firestore';
 import type { User } from './user';
 
 export interface Blog {
@@ -47,6 +59,67 @@ export const getAllBlogs = async () => {
 				} else {
 					reject('No such document!');
 				}
+			})
+			.catch((error) => {
+				reject(error);
+			});
+	});
+};
+
+export const getAllBlogByUserId = async (
+	userId: string,
+	_lastVisible: DocumentSnapshot | null = null,
+	_limit = 10
+): Promise<Blog[]> => {
+	return new Promise((resolve, reject) => {
+		if (!_lastVisible) {
+			return getDocs(query(collection(db, collectionName), orderBy('date', 'desc'), limit(1))).then(
+				(snapshot) => {
+					if (snapshot.docs.length <= 0) return resolve([]);
+					const q = query(
+						collection(db, collectionName),
+						where('userId', '==', userId),
+						orderBy('date', 'desc'),
+						startAfter(snapshot.docs[0]),
+						limit(_limit)
+					);
+					getDocs(q)
+						.then((snapshot) => {
+							resolve(
+								snapshot.docs.map((doc) => {
+									return {
+										id: doc.id,
+
+										...(doc.data() as Omit<Blog, 'id'>)
+									};
+								})
+							);
+						})
+						.catch((error) => {
+							reject(error);
+						});
+				}
+			);
+		}
+
+		const q = query(
+			collection(db, collectionName),
+			where('userId', '==', userId),
+			orderBy('date', 'desc'),
+			startAfter(_lastVisible),
+			limit(_limit)
+		);
+
+		getDocs(q)
+			.then((snapshot) => {
+				resolve(
+					snapshot.docs.map((doc) => {
+						return {
+							id: doc.id,
+							...(doc.data() as Omit<Blog, 'id'>)
+						};
+					})
+				);
 			})
 			.catch((error) => {
 				reject(error);

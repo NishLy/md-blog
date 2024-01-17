@@ -33,7 +33,15 @@ export async function load({ url }: { url: URL }) {
 		return user ? true : false;
 	}
 
+	const app = {
+		name: 'SvelteKit',
+		description: 'SvelteKit with Firebase',
+		version: '0.0.1',
+		baseUrl: 'http://localhost:3000'
+	};
+
 	return {
+		app,
 		getAuthUser: getAuthUser,
 		url: url.pathname,
 		invokeProtected

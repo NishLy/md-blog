@@ -10,6 +10,7 @@ export interface User {
 	followers: number;
 	following: number;
 	photoURL: string;
+	createdAt: string;
 	bookmarks: string[];
 }
 
@@ -104,7 +105,12 @@ export const getUser = async (id: string): Promise<User> => {
 							querySnapshot.forEach((doc) => {
 								bookmarks.push(doc.id);
 							});
-							resolve({ ...(docSnap.data() as User), uid: docSnap.id, bookmarks });
+							resolve({
+								...(docSnap.data() as User),
+								uid: docSnap.id,
+								bookmarks,
+								createdAt: docSnap.data().createdAt.toDate()
+							});
 						})
 						.catch((error) => {
 							reject(error);

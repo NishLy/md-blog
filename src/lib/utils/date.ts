@@ -1,5 +1,3 @@
-const pad = (n: number) => (n < 10 ? '0' + n : n);
-
 const getMonthName = (month: number) => {
 	switch (month) {
 		case 1:
@@ -48,4 +46,11 @@ export const printRelativeTime = (date: Date) => {
 	const day = date.getDate();
 
 	return `${year}-${getMonthName(month)}-${day}`;
+};
+
+export const printMonthYear = (date: Date) => {
+	const year = date.getFullYear();
+	const month = date.getMonth() + 1;
+
+	return `${getMonthName(month)} ${year}`;
 };
