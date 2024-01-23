@@ -139,7 +139,8 @@ export const getAllBlogByTag = async (tag: string): Promise<{ post: Blog; user: 
 					snapshot.forEach((doc) => {
 						loadedUsers[doc.id] = {
 							uid: doc.id,
-							...(doc.data() as Omit<User, 'uid'>)
+							...(doc.data() as Omit<Omit<User, 'uid'>, 'createdAt'>),
+							createdAt: doc.data().createdAt.toDate().toISOString()
 						};
 					});
 

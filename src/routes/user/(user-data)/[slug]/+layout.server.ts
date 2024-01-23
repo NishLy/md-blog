@@ -14,8 +14,6 @@ export async function load({ params }) {
 		const userPosts = await getAllBlogByUserId(slug);
 		const userData = await getUser(slug);
 
-		console.log(userData);
-
 		return {
 			userData,
 			userPosts
