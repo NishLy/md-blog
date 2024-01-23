@@ -4,6 +4,7 @@ import { initializeFirebase, auth } from '$lib/firebase.client';
 import { browser } from '$app/environment';
 import { onAuthStateChanged } from 'firebase/auth';
 import { logged } from '$lib/state/session';
+import { App } from '$lib/state/app';
 
 export async function load({ url }: { url: URL }) {
 	if (browser) {
@@ -14,7 +15,7 @@ export async function load({ url }: { url: URL }) {
 		}
 	}
 
-	function getAuthUser() {
+	function getAuthUser(): Promise<false | import('firebase/auth').User> {
 		return new Promise((resolve) => {
 			onAuthStateChanged(auth, (user) => resolve(user ? user : false));
 		});
@@ -37,8 +38,14 @@ export async function load({ url }: { url: URL }) {
 		name: 'SvelteKit',
 		description: 'SvelteKit with Firebase',
 		version: '0.0.1',
-		baseUrl: 'http://localhost:3000'
+		baseUrl: 'http://localhost:3000',
+		methods: {
+			getAuthUser,
+			invokeProtected
+		}
 	};
+
+	App.set(app);
 
 	return {
 		app,

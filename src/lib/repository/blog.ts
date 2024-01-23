@@ -24,6 +24,7 @@ export interface Blog {
 	date: string;
 	readTime: number;
 	userId: string;
+	summary: string;
 	isPublished: boolean;
 }
 
