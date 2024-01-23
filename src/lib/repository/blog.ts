@@ -69,11 +69,11 @@ export const getAllBlogs = async () => {
 
 export const getAllBlogByUserId = async (
 	userId: string,
-	_lastVisible: DocumentSnapshot | null = null,
+	lastVisible: DocumentSnapshot | null = null,
 	_limit = 10
 ): Promise<Blog[]> => {
 	return new Promise((resolve, reject) => {
-		if (!_lastVisible) {
+		if (!lastVisible) {
 			return getDocs(query(collection(db, collectionName), orderBy('date', 'desc'), limit(1))).then(
 				(snapshot) => {
 					if (snapshot.docs.length <= 0) return resolve([]);
@@ -81,7 +81,6 @@ export const getAllBlogByUserId = async (
 						collection(db, collectionName),
 						where('userId', '==', userId),
 						orderBy('date', 'desc'),
-						startAfter(snapshot.docs[0]),
 						limit(_limit)
 					);
 					getDocs(q)
@@ -107,7 +106,7 @@ export const getAllBlogByUserId = async (
 			collection(db, collectionName),
 			where('userId', '==', userId),
 			orderBy('date', 'desc'),
-			startAfter(_lastVisible),
+			startAfter(lastVisible),
 			limit(_limit)
 		);
 
