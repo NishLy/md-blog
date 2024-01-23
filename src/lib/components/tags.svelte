@@ -11,29 +11,16 @@
 	function addTag(tag: string) {
 		if (tags.includes(tag)) return;
 		tags = [...tags, tag];
+		onChange && onChange(tags);
 	}
 
 	function removeTag(tag: string) {
 		tags = tags.filter((t) => t !== tag);
-	}
-
-	$: (() => {
-		const input = document.querySelector('#tags') as HTMLInputElement;
-		if (!input) return;
-		input.value = tags.join(',');
 		onChange && onChange(tags);
-	})();
+	}
 </script>
 
 <div>
-	<input
-		type="text"
-		name="tags"
-		hidden
-		id="tags"
-		placeholder="tags"
-		class="w-full p-2 border-2 dark:text-black mb-2"
-	/>
 	<button
 		type="button"
 		class="w-full p-2 border-2 dark:text-black mb-2 flex flex-col"

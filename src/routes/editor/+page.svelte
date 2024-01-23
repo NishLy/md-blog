@@ -8,13 +8,15 @@
 	import type { ChangeEventHandler, FormEventHandler } from 'svelte/elements';
 	import { session, type User } from '$lib/state/session';
 	import { goto } from '$app/navigation';
+	import { fetchApi } from '$lib/utils/httpWrapper';
 
 	let editor: any;
 	let user: User | null = null;
 
 	let content: string;
-	let title: string;
+	let title: string = '';
 	let readTime: number;
+	let summary: string = '';
 	let tags: string[] = [];
 
 	session.subscribe((value) => {
@@ -29,10 +31,13 @@
 				content,
 				title,
 				readTime,
-				tags
+				tags,
+				summary
 			})
 		);
 	})();
+
+	console.log(tags);
 
 	onMount(() => {
 		if (browser) {
@@ -42,6 +47,7 @@
 				title = data.title;
 				readTime = data.readTime;
 				tags = data.tags;
+				summary = data.summary;
 			}
 
 			editor = new Editor({
@@ -88,22 +94,21 @@
 
 		if (!e.target || !editor) return;
 
-		const data = new FormData(e.target as HTMLFormElement);
-		const title = data.get('title');
-		const readTime = data.get('readTime');
-		const tags = data.get('tags');
-
 		const userId = user?.uid;
 
-		if (!title || !readTime || !tags || !content || !user) return;
+		if (!title || !readTime || !tags || !content || !user || !summary) return;
 
 		try {
-			await fetch('/api/page', {
+			await fetchApi('/api/page', {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ title, readTime, tags, content, userId })
+				body: JSON.stringify({
+					title,
+					readTime,
+					tags,
+					content,
+					userId,
+					summary
+				})
 			});
 
 			localStorage.removeItem('content-unsaved');
@@ -127,8 +132,22 @@
 					type="text"
 					name="title"
 					value={title}
+					min="3"
+					max="50"
 					on:input={(e) => (title = e.currentTarget.value)}
-					placeholder="title"
+					placeholder="Page Title"
+					class="w-full p-2 border-2 dark:text-black mb-2"
+				/>
+				<label for="readTime" class="dark:text-black">Page Summary</label>
+				<input
+					type="text"
+					name="summary"
+					required
+					min="30"
+					max="200"
+					value={summary}
+					on:input={(e) => (summary = e.currentTarget.value)}
+					placeholder="Summary to be displayed on list page"
 					class="w-full p-2 border-2 dark:text-black mb-2"
 				/>
 				<label for="readTime" class="dark:text-black">Read Time</label>
@@ -142,7 +161,14 @@
 					class="w-full p-2 border-2 dark:text-black mb-2"
 				/>
 				<label for="tags" class="dark:text-black">Tags</label>
-				<Tags allTags={['svelte']} initialTags={tags} onChange={(tags) => (tags = tags)} />
+				<Tags
+					allTags={['svelte']}
+					initialTags={[]}
+					onChange={(updatedTags) => {
+						tags = updatedTags;
+						console.log(tags);
+					}}
+				/>
 			</div>
 			<h3 class="dark:text-black font-semibold mx-0 m-2">Content</h3>
 			<div id="editor" class="flex flex-col gap-6 w-full lg:max-w-4x box-border mb-4"></div>

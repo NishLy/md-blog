@@ -1,3 +1,5 @@
+import handler from '$lib/error/httpErrorHandler';
+import { createResponse } from '$lib/utils/httpResponse';
 import { createBlog } from '../../../lib/repository/blog';
 
 export async function POST(event) {
@@ -7,7 +9,8 @@ export async function POST(event) {
 		const blog = {
 			title: data.title,
 			date: new Date().toISOString(),
-			tags: data.tags.split(',') || [],
+			tags: data.tags || [],
+			summary: data.summary,
 			content: data.content,
 			readTime: data.readTime,
 			userId: data.userId,
@@ -18,15 +21,13 @@ export async function POST(event) {
 
 		await createBlog(blog);
 
-		return new Response(JSON.stringify({ message: 'Page Published' }), {
-			headers: { 'content-type': 'application/json' },
-			status: 201
+		return createResponse({
+			status: 201,
+			body: {
+				message: 'Blog created successfully'
+			}
 		});
 	} catch (e) {
-		console.log(e);
-		return new Response(JSON.stringify({ message: 'Error In Creating Page', error: e }), {
-			headers: { 'content-type': 'application/json' },
-			status: 500
-		});
+		createResponse(handler(e));
 	}
 }
