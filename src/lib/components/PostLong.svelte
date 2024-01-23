@@ -7,6 +7,7 @@
 	import { session, userDataStore, type SessionState } from '$lib/state/session';
 	import { goto } from '$app/navigation';
 	import { App } from '$lib/state/app';
+	import { fetchApi } from '$lib/utils/httpWrapper';
 
 	export let user: User;
 	export let post: Blog;
@@ -50,14 +51,14 @@
 		}
 
 		try {
-			const res = await fetch('/api/bookmark/post/' + post.id, {
+			await fetchApi(`/api/bookmark/post/${idPost}`, {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
 				body: JSON.stringify({
 					uid: sessionData.user.uid
-				})
+				}),
+				headers: {
+					'Content-Type': 'application/json'
+				}
 			});
 
 			isOnBookmark = !isOnBookmark;
@@ -88,6 +89,7 @@
 		<img
 			src="https://avatars.githubusercontent.com/u/54907004?v=4"
 			alt="Thumbnail"
+			loading="lazy"
 			class="w-36 aspect-video object-cover"
 		/>
 	</div>

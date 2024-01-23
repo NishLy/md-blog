@@ -9,8 +9,7 @@ import {
 	where,
 	startAfter,
 	limit,
-	orderBy,
-	DocumentSnapshot
+	orderBy
 } from 'firebase/firestore';
 import type { User } from './user';
 
@@ -69,7 +68,7 @@ export const getAllBlogs = async () => {
 
 export const getAllBlogByUserId = async (
 	userId: string,
-	lastVisible: DocumentSnapshot | null = null,
+	lastVisible: string | null = null,
 	_limit = 10
 ): Promise<Blog[]> => {
 	return new Promise((resolve, reject) => {
@@ -89,7 +88,6 @@ export const getAllBlogByUserId = async (
 								snapshot.docs.map((doc) => {
 									return {
 										id: doc.id,
-
 										...(doc.data() as Omit<Blog, 'id'>)
 									};
 								})

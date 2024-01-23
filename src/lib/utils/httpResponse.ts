@@ -7,7 +7,7 @@ export const createResponse = ({
 	body?: Record<string, unknown>;
 	error?: Record<string, unknown>;
 }) => {
-	return new Response(JSON.stringify({ body, error }), {
+	return new Response(JSON.stringify({ ...body, ...error }), {
 		headers: {
 			'Content-Type': 'application/json'
 		},
