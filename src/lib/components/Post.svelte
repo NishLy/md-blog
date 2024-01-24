@@ -81,7 +81,7 @@
 		</div>
 		<h3 class="font-bold mt-2">{post.title}</h3>
 		<div class="summary dark:text-neutral-400 text-neutral-800 min-h-8">
-			{@html post.content}
+			{@html post.summary}
 		</div>
 	</a>
 

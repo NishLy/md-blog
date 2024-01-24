@@ -12,6 +12,7 @@ export interface User {
 	photoURL: string;
 	createdAt: string;
 	bookmarks: string[];
+	about: string;
 }
 
 export const createUser = async (user: Omit<User, 'uid'>) => {
@@ -33,6 +34,102 @@ export const toggleBookmark = async (uid: string, bookmarkId: string) => {
 						.catch((error) => {
 							reject(error);
 						});
+				}
+			})
+			.catch((error) => {
+				reject(error);
+			});
+	});
+};
+
+export const getFollowing = async (uid: string, followId: string): Promise<boolean> => {
+	return new Promise((resolve, reject) => {
+		getDoc(doc(db, collectionName, uid, 'following', followId))
+			.then((docSnap) => {
+				if (docSnap.exists()) {
+					resolve(true);
+				} else {
+					resolve(false);
+				}
+			})
+			.catch((error) => {
+				reject(error);
+			});
+	});
+};
+
+export const getFollowers = async (uid: string): Promise<string[]> => {
+	return new Promise((resolve, reject) => {
+		getDocs(collection(db, collectionName, uid, 'followers'))
+			.then((docSnap) => {
+				resolve(docSnap.docs.map((doc) => doc.id));
+			})
+			.catch((error) => {
+				reject(error);
+			});
+	});
+};
+
+export const toggleFollowUser = async (uid: string, followId: string) => {
+	return new Promise((resolve, reject) => {
+		getDoc(doc(db, collectionName, uid, 'following', followId))
+			.then((docSnap) => {
+				if (docSnap.exists()) {
+					updateFollowingCount(uid, false, followId);
+					updateFollowersCount(followId, false, uid);
+					return resolve('success');
+				} else {
+					updateFollowingCount(uid, true, followId);
+					updateFollowersCount(followId, true, uid);
+					return resolve('success');
+				}
+			})
+			.catch((error) => {
+				return reject(error);
+			});
+	});
+};
+
+const updateFollowingCount = async (uid: string, isFollow: boolean, followId: string) => {
+	return new Promise((resolve, reject) => {
+		getDoc(doc(db, collectionName, uid))
+			.then((docSnap) => {
+				if (docSnap.exists()) {
+					const count = docSnap.data().following;
+					if (isFollow) {
+						setDoc(doc(db, collectionName, uid), { ...docSnap.data(), following: count + 1 });
+						setDoc(doc(db, collectionName, uid, 'following', followId), { createdAt: new Date() });
+					} else {
+						setDoc(doc(db, collectionName, uid), { ...docSnap.data(), following: count - 1 });
+						deleteDoc(doc(db, collectionName, uid, 'following', followId));
+					}
+					resolve('success');
+				} else {
+					reject('No such document!');
+				}
+			})
+			.catch((error) => {
+				reject(error);
+			});
+	});
+};
+
+const updateFollowersCount = async (uid: string, isFollow: boolean, followId: string) => {
+	return new Promise((resolve, reject) => {
+		getDoc(doc(db, collectionName, uid))
+			.then((docSnap) => {
+				if (docSnap.exists()) {
+					const count = docSnap.data().followers;
+					if (isFollow) {
+						setDoc(doc(db, collectionName, uid), { ...docSnap.data(), followers: count + 1 });
+						setDoc(doc(db, collectionName, uid, 'followers', followId), { createdAt: new Date() });
+					} else {
+						setDoc(doc(db, collectionName, uid), { ...docSnap.data(), followers: count - 1 });
+						deleteDoc(doc(db, collectionName, uid, 'followers', followId));
+					}
+					resolve('success');
+				} else {
+					reject('No such document!');
 				}
 			})
 			.catch((error) => {
@@ -64,33 +161,39 @@ export const addUser = async (
 	isNewEntry: boolean;
 }> => {
 	return new Promise((resolve, reject) => {
-		checkUserExists(user.uid).then((exists) => {
-			if (exists) {
-				return resolve({
-					success: true,
-					isNewEntry: false
-				});
-			} else {
-				setDoc(doc(db, collectionName, user.uid), {
-					...user,
-					followers: 0,
-					following: 0
-				})
-					.then(() => {
-						setDoc(doc(db, collectionName, user.uid, 'bookmarks', 'default'), {
-							createdAt: new Date()
-						});
-
-						return resolve({
-							success: true,
-							isNewEntry: true
-						});
-					})
-					.catch((error) => {
-						reject(error);
+		checkUserExists(user.uid)
+			.then((exists) => {
+				if (exists) {
+					return resolve({
+						success: true,
+						isNewEntry: false
 					});
-			}
-		});
+				} else {
+					setDoc(doc(db, collectionName, user.uid), {
+						...user,
+						followers: 0,
+						following: 0,
+						createdAt: new Date(),
+						about: null
+					})
+						.then(() => {
+							setDoc(doc(db, collectionName, user.uid, 'bookmarks', 'default'), {
+								createdAt: new Date()
+							});
+
+							return resolve({
+								success: true,
+								isNewEntry: true
+							});
+						})
+						.catch((error) => {
+							reject(error);
+						});
+				}
+			})
+			.catch((error) => {
+				reject(error);
+			});
 	});
 };
 

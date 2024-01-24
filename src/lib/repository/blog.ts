@@ -44,7 +44,6 @@ export const getBlog = async (id: string): Promise<Blog> => {
 				}
 			})
 			.catch((error) => {
-				console.log('Error getting document:', error);
 				reject(error);
 			});
 	});
@@ -70,7 +69,7 @@ export const getAllBlogByUserId = async (
 	userId: string,
 	lastVisible: string | null = null,
 	_limit = 10
-): Promise<Blog[]> => {
+): Promise<Omit<Blog, 'content'>[]> => {
 	return new Promise((resolve, reject) => {
 		if (!lastVisible) {
 			return getDocs(query(collection(db, collectionName), orderBy('date', 'desc'), limit(1))).then(
@@ -79,6 +78,7 @@ export const getAllBlogByUserId = async (
 					const q = query(
 						collection(db, collectionName),
 						where('userId', '==', userId),
+						where('isPublished', '==', true),
 						orderBy('date', 'desc'),
 						limit(_limit)
 					);
@@ -88,7 +88,15 @@ export const getAllBlogByUserId = async (
 								snapshot.docs.map((doc) => {
 									return {
 										id: doc.id,
-										...(doc.data() as Omit<Blog, 'id'>)
+										title: doc.data().title,
+										likesCount: doc.data().likesCount,
+										commentsCount: doc.data().commentsCount,
+										tags: doc.data().tags,
+										date: doc.data().date,
+										readTime: doc.data().readTime,
+										userId: doc.data().userId,
+										summary: doc.data().summary,
+										isPublished: doc.data().isPublished
 									};
 								})
 							);
@@ -103,6 +111,7 @@ export const getAllBlogByUserId = async (
 		const q = query(
 			collection(db, collectionName),
 			where('userId', '==', userId),
+			where('isPublished', '==', true),
 			orderBy('date', 'desc'),
 			startAfter(lastVisible),
 			limit(_limit)
@@ -114,7 +123,15 @@ export const getAllBlogByUserId = async (
 					snapshot.docs.map((doc) => {
 						return {
 							id: doc.id,
-							...(doc.data() as Omit<Blog, 'id'>)
+							title: doc.data().title,
+							likesCount: doc.data().likesCount,
+							commentsCount: doc.data().commentsCount,
+							tags: doc.data().tags,
+							date: doc.data().date,
+							readTime: doc.data().readTime,
+							userId: doc.data().userId,
+							summary: doc.data().summary,
+							isPublished: doc.data().isPublished
 						};
 					})
 				);
@@ -125,30 +142,55 @@ export const getAllBlogByUserId = async (
 	});
 };
 
-export const getAllBlogByTag = async (tag: string): Promise<{ post: Blog; user: User }[]> => {
+export const getAllBlogByTag = async (
+	tag: string
+): Promise<
+	{ post: Omit<Blog, 'content'>; user: { uid: string; displayName: string; photoUrl: string } }[]
+> => {
 	return new Promise((resolve, reject) => {
-		getDocs(collection(db, collectionName))
+		const q = query(collection(db, collectionName), where('isPublished', '==', true));
+		getDocs(q)
 			.then((snapshotBlog) => {
-				const blogs: { post: Blog; user: User }[] = [];
+				const blogs: {
+					post: Omit<Blog, 'content'>;
+					user: { uid: string; displayName: string; photoUrl: string };
+				}[] = [];
 
 				getDocs(collection(db, 'users')).then((snapshot) => {
-					const loadedUsers: Record<string, User> = {};
+					const loadedUsers: Record<string, Partial<User>> = {};
 
 					snapshot.forEach((doc) => {
 						loadedUsers[doc.id] = {
 							uid: doc.id,
-							...(doc.data() as Omit<Omit<User, 'uid'>, 'createdAt'>),
-							createdAt: doc.data().createdAt.toDate().toISOString()
+							...(doc.data() as Omit<Omit<User, 'uid'>, 'createdAt'>)
 						};
+
+						delete loadedUsers[doc.id].about;
+						delete loadedUsers[doc.id].bookmarks;
+						delete loadedUsers[doc.id].createdAt;
+						delete loadedUsers[doc.id].followers;
+						delete loadedUsers[doc.id].following;
 					});
 
 					snapshotBlog.forEach((docBlog) => {
 						const data = {
 							post: {
 								id: docBlog.id,
-								...(docBlog.data() as Omit<Blog, 'id'>)
+								title: docBlog.data().title,
+								likesCount: docBlog.data().likesCount,
+								commentsCount: docBlog.data().commentsCount,
+								tags: docBlog.data().tags,
+								date: docBlog.data().date,
+								readTime: docBlog.data().readTime,
+								userId: docBlog.data().userId,
+								summary: docBlog.data().summary,
+								isPublished: docBlog.data().isPublished
 							},
-							user: loadedUsers[docBlog.data().userId] as User
+							user: loadedUsers[docBlog.data().userId] as {
+								uid: string;
+								displayName: string;
+								photoUrl: string;
+							}
 						};
 
 						if (data.post.tags.includes(tag)) {

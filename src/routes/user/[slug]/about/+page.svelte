@@ -6,7 +6,7 @@
 </script>
 
 <div>
-	<p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quam, voluptas!</p>
+	<p>{data.userData?.about ?? 'This user has not written anything about themselves yet.'}</p>
 	<p class="dark:text-neutral-300 mt-6">
 		{data.app.name} member since {printMonthYear(new Date(data.userData?.createdAt ?? Date.now()))}
 	</p>

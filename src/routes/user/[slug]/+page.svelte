@@ -45,7 +45,7 @@
 	}
 </script>
 
-<div class="p-4 flex flex-col gap-6 overflow-y-auto" bind:this={postsWrapper}>
+<div class="flex flex-col gap-6" bind:this={postsWrapper}>
 	{#if data.userData && data.userPosts}
 		{#each fetchedPosts as post}
 			<PostLong {post} user={data.userData} />

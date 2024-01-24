@@ -12,6 +12,7 @@ export async function POST({ request }) {
 		}
 
 		const user = await addUser(body);
+
 		return createResponse({
 			body: user,
 			status: 200
