@@ -1,5 +1,16 @@
 import { db } from '$lib/firebase.client';
-import { getDoc, doc, setDoc, getDocs, collection, deleteDoc } from 'firebase/firestore';
+import {
+	getDoc,
+	doc,
+	setDoc,
+	getDocs,
+	collection,
+	deleteDoc,
+	limit,
+	query,
+	startAfter,
+	orderBy
+} from 'firebase/firestore';
 
 const collectionName = 'users';
 
@@ -13,6 +24,7 @@ export interface User {
 	createdAt: string;
 	bookmarks: string[];
 	about: string;
+	isHideFollow: boolean;
 }
 
 export const createUser = async (user: Omit<User, 'uid'>) => {
@@ -58,11 +70,121 @@ export const getFollowing = async (uid: string, followId: string): Promise<boole
 	});
 };
 
-export const getFollowers = async (uid: string): Promise<string[]> => {
+export const getFollowerIds = async (
+	uid: string,
+	starAfter: string | undefined,
+	_limit = 10
+): Promise<string[] | null> => {
 	return new Promise((resolve, reject) => {
-		getDocs(collection(db, collectionName, uid, 'followers'))
+		const q = starAfter
+			? query(
+					collection(db, collectionName, uid, 'followers'),
+					orderBy('createdAt', 'desc'),
+					startAfter(starAfter),
+					limit(_limit)
+				)
+			: query(collection(db, collectionName, uid, 'followers'), limit(_limit));
+
+		getDocs(q)
 			.then((docSnap) => {
 				resolve(docSnap.docs.map((doc) => doc.id));
+			})
+			.catch((error) => {
+				reject(error);
+			});
+	});
+};
+export const getFollowingIds = async (
+	uid: string,
+	starAfter: string | undefined,
+	_limit = 10
+): Promise<string[] | null> => {
+	return new Promise((resolve, reject) => {
+		const q = starAfter
+			? query(
+					collection(db, collectionName, uid, 'following'),
+					orderBy('createdAt', 'desc'),
+					startAfter(starAfter),
+					limit(_limit)
+				)
+			: query(collection(db, collectionName, uid, 'following'), limit(_limit));
+
+		getDocs(q)
+			.then((docSnap) => {
+				resolve(docSnap.docs.map((doc) => doc.id));
+			})
+			.catch((error) => {
+				reject(error);
+			});
+	});
+};
+
+export const getFollowerList = async (
+	uid: string,
+	starAfter: string | undefined
+): Promise<{ displayName: string; photoURL: string; uid: string; about: string }[] | null> => {
+	return new Promise((resolve, reject) => {
+		getDoc(doc(db, collectionName, uid))
+			.then((docSnap) => {
+				if (docSnap.exists()) {
+					if (docSnap.data().isHideFollow) return resolve(null);
+
+					getFollowerIds(uid, starAfter).then((followers) => {
+						if (followers) {
+							const promises = followers.map((follower) => getUser(follower));
+							Promise.all(promises).then((users) => {
+								resolve(
+									users.map((user) => ({
+										displayName: user.displayName,
+										photoURL: user.photoURL,
+										uid: user.uid,
+										about: user.about
+									}))
+								);
+							});
+						} else {
+							resolve(null);
+						}
+					});
+				} else {
+					reject('No such document!');
+				}
+			})
+			.catch((error) => {
+				reject(error);
+			});
+	});
+};
+export const getFollowingList = async (
+	uid: string,
+	starAfter: string | undefined = undefined
+): Promise<{ displayName: string; photoURL: string; uid: string; about: string }[] | null> => {
+	return new Promise((resolve, reject) => {
+		getDoc(doc(db, collectionName, uid))
+			.then((docSnap) => {
+				if (docSnap.exists()) {
+					if (docSnap.data().isHideFollow) return resolve(null);
+
+					getFollowingIds(uid, starAfter).then((followings) => {
+						if (followings) {
+							const promises = followings.map((following) => getUser(following));
+							Promise.all(promises).then((users) => {
+								resolve(
+									users.map((user) => ({
+										displayName: user.displayName,
+										photoURL: user.photoURL,
+										uid: user.uid,
+										about: user.about
+									}))
+								);
+							});
+						} else {
+							resolve(null);
+						}
+					});
+				} else {
+					reject('No such document!');
+				}
 			})
 			.catch((error) => {
 				reject(error);
@@ -174,7 +296,8 @@ export const addUser = async (
 						followers: 0,
 						following: 0,
 						createdAt: new Date(),
-						about: null
+						about: null,
+						isHideFollow: false
 					})
 						.then(() => {
 							setDoc(doc(db, collectionName, user.uid, 'bookmarks', 'default'), {
@@ -197,33 +320,39 @@ export const addUser = async (
 	});
 };
 
-export const getUser = async (id: string): Promise<User> => {
+export const getUser = async (id: string, includeBookmarks = false): Promise<User> => {
 	return new Promise((resolve, reject) => {
 		getDoc(doc(db, collectionName, id))
 			.then((docSnap) => {
 				if (docSnap.exists()) {
-					getDocs(collection(db, collectionName, docSnap.id, 'bookmarks'))
-						.then((querySnapshot) => {
-							const bookmarks: string[] = [];
-							querySnapshot.forEach((doc) => {
-								bookmarks.push(doc.id);
+					if (includeBookmarks)
+						return getDocs(collection(db, collectionName, docSnap.id, 'bookmarks'))
+							.then((querySnapshot) => {
+								const bookmarks: string[] = [];
+								querySnapshot.forEach((doc) => {
+									bookmarks.push(doc.id);
+								});
+								return resolve({
+									...(docSnap.data() as User),
+									uid: docSnap.id,
+									bookmarks,
+									createdAt: docSnap.data().createdAt.toDate()
+								});
+							})
+							.catch((error) => {
+								return reject(error);
 							});
-							resolve({
-								...(docSnap.data() as User),
-								uid: docSnap.id,
-								bookmarks,
-								createdAt: docSnap.data().createdAt.toDate()
-							});
-						})
-						.catch((error) => {
-							reject(error);
-						});
+					resolve({
+						...(docSnap.data() as User),
+						uid: docSnap.id,
+						createdAt: docSnap.data().createdAt.toDate()
+					});
 				} else {
 					reject('No such document!');
 				}
 			})
 			.catch((error) => {
-				reject(error);
+				return reject(error);
 			});
 	});
 };
