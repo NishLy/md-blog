@@ -7,20 +7,20 @@
 		>{data.userData?.displayName}</a
 	>
 	{'>'}
-	<span>Following</span>
+	<span>Followers</span>
 </div>
 <h3>
-	{#if data.following}
-		{data.userData?.following} Following
+	{#if data.followers}
+		{data.userData?.followers} Followers
 	{:else}
-		0 Following
+		0 Followers
 	{/if}
 </h3>
 <div class="flex flex-col gap-6">
 	{#if data.isPrivate}
 		<p>This user's following list is private</p>
-	{:else if data.following}
-		{#each data.following as user}
+	{:else if data.followers}
+		{#each data.followers as user}
 			<a class="flex gap-2 items-start cursor-pointer" href={`/user/${user.uid}`}>
 				<img src={user.photoURL} alt="" class="w-10 h-10 rounded-full" />
 				<div>

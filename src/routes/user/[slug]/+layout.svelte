@@ -105,6 +105,14 @@
 					Following
 				</a>
 			</li>
+			<li>
+				<a
+					class={route === 'followers' ? 'border-b-[1px] border-white pb-2' : ''}
+					href={'/user/' + data.userData?.uid + '/followers'}
+				>
+					Followers
+				</a>
+			</li>
 		</ul>
 	</div>
 

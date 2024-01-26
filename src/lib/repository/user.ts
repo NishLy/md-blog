@@ -121,7 +121,7 @@ export const getFollowingIds = async (
 
 export const getFollowerList = async (
 	uid: string,
-	starAfter: string | undefined
+	starAfter: string | undefined = undefined
 ): Promise<{ displayName: string; photoURL: string; uid: string; about: string }[] | null> => {
 	return new Promise((resolve, reject) => {
 		getDoc(doc(db, collectionName, uid))

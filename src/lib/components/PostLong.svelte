@@ -10,7 +10,7 @@
 	import { fetchApi } from '$lib/utils/httpWrapper';
 
 	export let user: User;
-	export let post: Blog;
+	export let post: Omit<Blog, 'content'>;
 
 	let signInInvoker: ((message: string) => Promise<boolean>) | undefined = undefined;
 
@@ -125,12 +125,3 @@
 		</button>
 	</div>
 </div>
-
-<style>
-	.summary {
-		display: -webkit-box;
-		-webkit-line-clamp: 3;
-		-webkit-box-orient: vertical;
-		overflow: hidden;
-	}
-</style>
