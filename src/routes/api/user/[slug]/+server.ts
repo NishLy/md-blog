@@ -10,7 +10,7 @@ export async function GET({ params }: RequestEvent) {
 			});
 		}
 
-		const user = await getUser(params.slug);
+		const user = await getUser(params.slug, true);
 
 		return new Response(JSON.stringify(user), {
 			headers: { 'content-type': 'application/json' },

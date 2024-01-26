@@ -28,6 +28,7 @@ export async function load({ params }) {
 		if (parsedMarkdown) {
 			return {
 				page: {
+					id: blogData.id,
 					title: blogData.title,
 					likesCount: blogData.likesCount,
 					commentsCount: blogData.commentsCount,
@@ -35,6 +36,7 @@ export async function load({ params }) {
 					content: parsedMarkdown,
 					date: blogData.date,
 					readTime: blogData.readTime,
+					summary: blogData.summary,
 					author: {
 						name: author.displayName,
 						avatar: author.photoURL
@@ -43,7 +45,6 @@ export async function load({ params }) {
 			};
 		}
 	} catch (e) {
-		console.log(e);
 		error(404, 'Not found');
 	}
 }

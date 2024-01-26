@@ -7,6 +7,7 @@
 	import type { User } from '$lib/repository/user';
 	import Sidemenu from '$lib/components/Sidemenu.svelte';
 	import Signin from '$lib/components/Signin.svelte';
+	import { fetchApi } from '$lib/utils/httpWrapper';
 
 	export let data;
 
@@ -20,13 +21,12 @@
 
 		if (!cur?.user) return;
 		try {
-			const data = await fetch('/api/user/' + cur.user?.uid);
-			const res = await data.json();
+			const data = await fetchApi('/api/user/' + cur.user?.uid);
 
 			userDataStore.update((cur: any) => {
 				return {
 					...cur,
-					...res
+					...data.body
 				};
 			});
 

@@ -24,14 +24,6 @@
 		isOnBookmark = !!userData?.bookmarks?.includes(post.id);
 	});
 
-	$: (() => {
-		if (!userData || !userData.bookmarks) return;
-	})();
-
-	onMount(async () => {
-		if (browser) return;
-	});
-
 	async function toggleBookmark(idPost: string) {
 		if (!browser) return;
 
@@ -60,7 +52,7 @@
 </script>
 
 <div class="flex flex-col gap-3 justify-start">
-	<a href={'/page/' + post.id} class="flex flex-col gap-4">
+	<a href={'/blog/' + post.id} class="flex flex-col gap-4">
 		<img
 			src="https://avatars.githubusercontent.com/u/54907004?v=4"
 			alt="Thumbnail"

@@ -38,7 +38,10 @@ export const getBlog = async (id: string): Promise<Blog> => {
 		getDoc(doc(db, collectionName, id))
 			.then((doc) => {
 				if (doc.exists()) {
-					resolve(doc.data() as Blog);
+					resolve({
+						id: doc.id,
+						...(doc.data() as Omit<Blog, 'id'>)
+					});
 				} else {
 					reject('No such document!');
 				}
