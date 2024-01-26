@@ -10,6 +10,8 @@
 	let photoURL: string = '';
 	export let signInInvoker: (message: string) => Promise<boolean>;
 
+	let navbarEl: HTMLElement;
+
 	onMount(() => {
 		if (!browser) return;
 		session.subscribe((s) => {
@@ -17,11 +19,20 @@
 			loggedIn = !!s.loggedIn;
 			photoURL = s.user?.photoURL ?? '';
 		});
+
+		document.addEventListener('scroll', (ev) => {
+			if (window.scrollY === 0) {
+				navbarEl?.classList.add('fixed');
+			} else {
+				navbarEl?.classList.remove('fixed');
+			}
+		});
 	});
 </script>
 
 <header
-	class="w-full h-18 p-4 px-6 sticky items-center flex border-b-[.1rem] border-black/50 dark:border-white/50 dark:text-white"
+	bind:this={navbarEl}
+	class="dark:bg-dark-primary top-0 left-0 w-full h-18 p-4 px-6 sticky items-center flex border-b-[.1rem] border-black/50 dark:border-white/50 dark:text-white"
 >
 	<nav class="w-full">
 		<ul class="flex items-center gap-x-4 w-full h-10">
