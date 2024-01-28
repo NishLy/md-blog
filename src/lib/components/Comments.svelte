@@ -7,10 +7,15 @@
 	import { session, userDataStore, type SessionState, type UserData } from '$lib/state/session';
 	import { onMount } from 'svelte';
 	import Loading from './Loading.svelte';
+	import { showResponseWrapper } from '$lib/state/blog';
 
 	export let blogId: string;
-	export let showResponses: boolean = true;
+	export let showResponses: boolean = false;
 	export let comments: any[] = [];
+
+	showResponseWrapper.subscribe((cur) => {
+		showResponses = cur;
+	});
 
 	let observer: IntersectionObserver | undefined = undefined;
 	let isEnd = false;
@@ -83,7 +88,7 @@
 	})();
 
 	let onClose = () => {
-		showResponses = false;
+		showResponseWrapper.set(false);
 	};
 
 	async function postComment(ev: SubmitEvent, level: number = 1, parentId: null | string = null) {
@@ -176,7 +181,7 @@
 		<div>
 			<div class="dark:text-black flex justify-between items-center">
 				<h4>Responses</h4>
-				<button on:click={onClose}>X</button>
+				<button on:click={onClose}><i class="fa-solid fa-xmark"></i></button>
 			</div>
 			<form on:submit={postComment}>
 				<textarea
@@ -184,7 +189,7 @@
 					name="comment"
 					required
 					class="w-full mt-4 p-4 rounded-sm shadow-md dark:text-black"
-					rows="2"
+					rows="3"
 					on:click={async (ev) => {
 						if (await siginInInvoker('You need to sign in to reply')) {
 							ev.currentTarget.focus();
@@ -193,7 +198,7 @@
 					placeholder="What's your thoughs"
 				></textarea>
 				<button type="submit" class="px-4 py-2 rounded-md shadow-md bg-green-600 text-white mb-6"
-					>Reply</button
+					>Post Response</button
 				>
 			</form>
 		</div>

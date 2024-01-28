@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
+	import { showResponseWrapper } from '$lib/state/blog.js';
 	import {
 		session,
 		userDataStore,
@@ -47,8 +48,6 @@
 	let userData: UserData;
 	let sessionData: SessionState;
 	let isOnBookmark: boolean = false;
-
-	let showResponses = false;
 
 	session.subscribe((cur: any) => {
 		sessionData = cur;
@@ -122,10 +121,14 @@
 						<span><i class="fa-solid fa-heart"></i></span>
 						<span>{data.page?.likesCount}</span>
 					</div>
-					<div>
+					<button
+						on:click={() => {
+							showResponseWrapper.set(true);
+						}}
+					>
 						<span><i class="fa-solid fa-comment"></i></span>
 						<span>{data.page?.commentsCount}</span>
-					</div>
+					</button>
 				</div>
 
 				<div class="flex gap-4">
@@ -156,7 +159,7 @@
 				{/each}
 			{/if}
 		</div>
-		<article class="flex flex-col gap-4">
+		<article class="flex flex-col gap-4 break-words">
 			{#if data.page}
 				{@html data.page.content}
 			{/if}
