@@ -2,14 +2,17 @@ import { db } from '$lib/firebase.client';
 import {
 	addDoc,
 	collection,
+	doc,
 	getDocs,
+	increment,
 	limit,
 	orderBy,
 	query,
 	startAfter,
+	updateDoc,
 	where
 } from 'firebase/firestore';
-import { getBlog } from './blog';
+import { addBlogReplyCount, getBlog } from './blog';
 
 export type CommentInterface = {
 	id: string;
@@ -65,6 +68,9 @@ export const createComment = async (comment: {
 					repliesCount: 0
 				};
 
+				if (commentFilled.parentId) addCommentReplyCount(commentFilled.parentId as string);
+				addBlogReplyCount(commentFilled.blogId);
+
 				addDoc(collection(db, collectionName), commentFilled)
 					.then((docRef) => {
 						resolve(docRef.id);
@@ -72,6 +78,22 @@ export const createComment = async (comment: {
 					.catch((error) => {
 						reject(error);
 					});
+			})
+			.catch((error) => {
+				reject(error);
+			});
+	});
+};
+
+export const addCommentReplyCount = async (commentId: string) => {
+	return new Promise((resolve, reject) => {
+		const commentRef = doc(db, collectionName, commentId);
+
+		return updateDoc(commentRef, {
+			repliesCount: increment(1)
+		})
+			.then(() => {
+				resolve('Reply count updated');
 			})
 			.catch((error) => {
 				reject(error);

@@ -128,7 +128,7 @@
 				})
 			});
 
-			console.log(res);
+			(ev.currentTarget as HTMLFormElement)?.reset();
 
 			alert('Comment posted successfully');
 		} catch (error) {

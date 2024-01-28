@@ -9,7 +9,9 @@ import {
 	where,
 	startAfter,
 	limit,
-	orderBy
+	orderBy,
+	updateDoc,
+	increment
 } from 'firebase/firestore';
 import type { User } from './user';
 
@@ -28,6 +30,12 @@ export interface Blog {
 }
 
 const collectionName = 'blogs';
+
+export const addBlogReplyCount = async (blogId: string) => {
+	return updateDoc(doc(db, collectionName, blogId), {
+		commentsCount: increment(1)
+	});
+};
 
 export const createBlog = async (blog: Omit<Blog, 'id'>) => {
 	return await addDoc(collection(db, collectionName), blog);
