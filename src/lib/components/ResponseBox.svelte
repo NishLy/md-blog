@@ -2,13 +2,15 @@
 	import { printRelativeTime } from '$lib/utils/date';
 	import { onMount, type ComponentType } from 'svelte';
 
-	export let text: string;
+	export let content: string;
 
 	export let likes = 0;
 	export let replies = 0;
-	export let date = new Date();
-	export let displayName: string = 'Unknown';
-	export let photoURL: string;
+	export let createdAt = new Date();
+	export let user: { displayName: string; photoURL: string } = {
+		displayName: 'Anonymous',
+		photoURL: 'https://avatars.githubusercontent.com/u/54907004?v=4'
+	};
 
 	export let components:
 		| {
@@ -50,10 +52,10 @@
 
 	onMount(() => {
 		if (typeof window === 'undefined') return;
-		if (text.length > 200) {
+		if (content.length > 200) {
 			haveMoreText = true;
-			moreText = text.slice(200);
-			text = text.slice(0, 200) + '...';
+			moreText = content.slice(200);
+			content = content.slice(0, 200) + '...';
 		}
 
 		if (!moreRepliesElement || !verticalLineElement || !textElement) return;
@@ -67,12 +69,12 @@
 
 	let onExpand = () => {
 		isExpanded = true;
-		text = text.slice(0, 200) + moreText;
+		content = content.slice(0, 200) + moreText;
 	};
 
 	let onCollapse = () => {
 		isExpanded = false;
-		text = text.slice(0, 200) + '...';
+		content = content.slice(0, 200) + '...';
 	};
 </script>
 
@@ -80,20 +82,20 @@
 	<div class="flex justify-between items-center dark:text-black">
 		<div class="flex gap-4 items-center">
 			<img
-				src={photoURL ?? 'https://avatars.githubusercontent.com/u/54907004?v=4'}
+				src={user.photoURL ?? 'https://avatars.githubusercontent.com/u/54907004?v=4'}
 				alt=""
 				class="rounded-full w-10 h-10 flex-shrink-0"
 			/>
 			<div>
-				<h6>{displayName}</h6>
-				<p class="text-sm opacity-90">{printRelativeTime(date)}</p>
+				<h6>{user.displayName}</h6>
+				<p class="text-sm opacity-90">{printRelativeTime(createdAt)}</p>
 			</div>
 		</div>
 		<div class="flex gap-4">...</div>
 	</div>
 	<div class="dark:text-black mt-4">
 		<p class="mb-2" bind:this={textElement}>
-			{text}
+			{content}
 		</p>
 		{#if haveMoreText}
 			{#if isExpanded}

@@ -1,6 +1,8 @@
 <script>
 	import Comments from '$lib/components/Comments.svelte';
+
+	export let data;
 </script>
 
 <slot />
-<Comments />
+<Comments blogId={data.props.slug} />

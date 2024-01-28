@@ -8,8 +8,13 @@ import {
 	ServiceUnavailableError,
 	GatewayTimeoutError
 } from './errors';
+import { ValidationError } from 'yup';
 
 export default function handler(error: Error | unknown) {
+	if (error instanceof ValidationError) {
+		return { status: 400, body: { error: error.message } };
+	}
+
 	if (error instanceof NotFoundError) {
 		return { status: 404, body: { error: error.message } };
 	}
