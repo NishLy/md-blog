@@ -6,13 +6,64 @@
 	import type { CommentInterface } from '$lib/repository/comment';
 	import { session, userDataStore, type SessionState, type UserData } from '$lib/state/session';
 	import { onMount } from 'svelte';
+	import Loading from './Loading.svelte';
 
 	export let blogId: string;
 	export let showResponses: boolean = true;
+	export let comments: any[] = [];
+
+	let observer: IntersectionObserver | undefined = undefined;
+	let isEnd = false;
+	let isLoaded = false;
+
+	let dataWrapper: HTMLDivElement | undefined = undefined;
+
+	async function fetchPage(after: string) {
+		isLoaded = false;
+		try {
+			const res = await fetchApi(`/api/blog/${blogId}/comment?startAfter=${after}`);
+
+			comments = [...comments, ...mapComments(res.body.comments)];
+
+			if (res.body.comments.length < 10) {
+				observer?.disconnect();
+				observer = undefined;
+				isEnd = true;
+			}
+		} catch (e) {
+		} finally {
+			isLoaded = true;
+		}
+	}
+
+	$: (() => {
+		if (!dataWrapper) return;
+		if (observer) return;
+		if (isEnd) return;
+		if (comments.length === 0) return;
+
+		observer = new IntersectionObserver(
+			(entries) => {
+				if (entries[0].isIntersecting && !isEnd) {
+					const last = dataWrapper!.querySelector('#last');
+					if (last) {
+						fetchPage(comments[comments.length - 1].createdAt);
+					}
+				}
+			},
+			{
+				root: dataWrapper,
+				threshold: 0.5
+			}
+		);
+
+		const last = dataWrapper.lastElementChild;
+		if (last) {
+			observer.observe(last);
+		}
+	})();
 
 	let siginInInvoker: (m: string) => Promise<boolean>;
-
-	export let comments: any = [];
 
 	let userSession: UserData | undefined = undefined;
 
@@ -77,9 +128,10 @@
 			});
 
 			comments = mapComments(res.body.comments);
-			console.log(comments);
 		} catch (error) {
 			console.error(error);
+		} finally {
+			isLoaded = true;
 		}
 	});
 
@@ -146,18 +198,24 @@
 			</form>
 		</div>
 		<hr />
-		<div class="flex flex-col gap-4 my-4">
-			{#if comments.length === 0}
+		<div class="flex flex-col gap-4 my-4" bind:this={dataWrapper}>
+			{#if comments.length === 0 && isLoaded}
 				<div class="text-center">No responses yet</div>
 			{:else}
 				{#each comments as comment}
 					<ResponseBox
 						{...comment}
 						createdAt={new Date(comment.createdAt)}
-						updatedAt={new Date(comment.createdAt)}
+						updatedAt={new Date(comment.updatedAt)}
 					/>
 				{/each}
 			{/if}
+
+			{#if !isLoaded}
+				<Loading />
+			{/if}
+
+			<div id="last"></div>
 		</div>
 	</div>
 {/if}

@@ -96,6 +96,8 @@
 		userSession = cur;
 	});
 
+	console.log(updatedAt?.getTime(), createdAt?.getTime());
+
 	App.subscribe((app) => {
 		siginInInvoker = app.methods.invokeProtected;
 	});
@@ -135,6 +137,39 @@
 			console.error(error);
 		}
 	}
+
+	async function updateComment(ev: SubmitEvent) {
+		try {
+			const data = new FormData(ev.currentTarget as HTMLFormElement);
+
+			const comment = data.get('comment') as string;
+
+			if (!comment) return;
+
+			const res = await fetchApi(`/api/blog/${blogId}/comment`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					content: comment,
+					id: id,
+					uid: userSession?.uid
+				})
+			});
+
+			(ev.currentTarget as HTMLFormElement)?.reset();
+
+			content = comment;
+			showEditField = false;
+			alert('Comment updated successfully');
+		} catch (error) {
+			console.error(error);
+		}
+	}
+
+	let showMenu = false;
+	let showEditField = false;
 </script>
 
 <div class="flex flex-col">
@@ -150,9 +185,9 @@
 				<p class="text-sm opacity-90 flex gap-2">
 					{printRelativeTime(new Date(createdAt ?? Date.now()))}
 
-					{#if updatedAt?.getTime() != createdAt?.getTime()}
+					{#if updatedAt?.getTime() !== createdAt?.getTime()}
 						<span>
-							<span class=" bg-green-300 px-1 rounded-sm">Edited</span>
+							<span class=" bg-yellow-300 px-1 rounded-sm">Edited</span>
 						</span>
 					{/if}
 
@@ -162,12 +197,83 @@
 				</p>
 			</div>
 		</div>
-		<div class="flex gap-4">...</div>
+		<div class="flex gap-4 relative">
+			<button
+				on:click={() => {
+					showMenu = !showMenu;
+				}}
+			>
+				<i class="fa-solid fa-ellipsis"></i>
+			</button>
+
+			{#if showMenu}
+				<div class="absolute w-36 top-8 right-0 bg-white rounded-md shadow-md overflow-hidden z-50">
+					{#if userSession?.uid !== user.uid}
+						<button
+							on:click={() => {
+								showMenu = false;
+							}}
+							class="flex items-center w-full gap-2 hover:bg-yellow-400 p-4"
+						>
+							<i class="fa-solid fa-circle-exclamation"></i>
+							<span class="ml-2">Report</span>
+						</button>
+					{/if}
+					{#if userSession?.uid == user.uid}
+						<button
+							on:click={() => {
+								showEditField = true;
+								showMenu = false;
+							}}
+							class="flex w-full items-center gap-2 hover:bg-blue-400 p-4"
+						>
+							<i class="fa-solid fa-pen-to-square"></i>
+							<span class="ml-2">Edit</span>
+						</button>
+						<!-- <button
+							on:click={() => {
+								showMenu = false;
+							}}
+							class="flex w-full items-center gap-2 hover:bg-red-400 p-4"
+						>
+							<i class="fa-solid fa-trash fa-sm"></i>
+							<span class="ml-2">Delete</span>
+						</button> -->
+					{/if}
+				</div>
+			{/if}
+		</div>
 	</div>
 	<div class="dark:text-black mt-4">
-		<p class="mb-2 whitespace-pre" bind:this={textElement}>
-			{content}
-		</p>
+		{#if showEditField}
+			<form on:submit={updateComment}>
+				<textarea
+					class="w-full p-4 rounded-md shadow-md"
+					name="comment"
+					rows="4"
+					value={content}
+					placeholder="What's your thoughs"
+				></textarea>
+				<div class="flex justify-between items-center">
+					<button
+						on:click={() => {
+							showEditField = false;
+						}}
+						class="text-red-400"
+					>
+						<i class="fa-solid fa-xmark fa-lg"></i>
+						Cancel
+					</button>
+					<button type="submit" class="px-4 py-2 rounded-md shadow-md bg-green-600 text-white"
+						>Edit</button
+					>
+				</div>
+			</form>
+		{:else}
+			<p class="mb-2 whitespace-pre" bind:this={textElement}>
+				{content}
+			</p>
+		{/if}
 		{#if haveMoreText}
 			{#if isExpanded}
 				<button class="text-green-600" on:click={onCollapse}>Read less</button>

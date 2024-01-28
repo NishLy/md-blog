@@ -3,6 +3,7 @@ import {
 	addDoc,
 	collection,
 	doc,
+	getDoc,
 	getDocs,
 	increment,
 	limit,
@@ -13,6 +14,7 @@ import {
 	where
 } from 'firebase/firestore';
 import { addBlogReplyCount, getBlog } from './blog';
+import { ForbiddenError } from '$lib/error/errors';
 
 export type CommentInterface = {
 	id: string;
@@ -101,6 +103,35 @@ export const addCommentReplyCount = async (commentId: string) => {
 	});
 };
 
+export const updateCommentContent = async (commentId: string, content: string, userId: string) => {
+	return new Promise((resolve, reject) => {
+		getDoc(doc(db, collectionName, commentId))
+			.then((docSnap) => {
+				if (!docSnap.exists()) {
+					return reject('Comment not found');
+				}
+
+				if (docSnap.data().user.uid !== userId) {
+					return reject(new ForbiddenError('You are not allowed to update this comment'));
+				}
+
+				updateDoc(doc(db, collectionName, commentId), {
+					content,
+					updatedAt: new Date()
+				})
+					.then(() => {
+						resolve('Comment updated');
+					})
+					.catch((error) => {
+						reject(error);
+					});
+			})
+			.catch((error) => {
+				reject(error);
+			});
+	});
+};
+
 export const getComments = async (
 	blogId: string,
 	starAfter: string | undefined = undefined,
@@ -151,7 +182,7 @@ export const getComments = async (
 			collection(db, collectionName),
 			where('blogId', '==', blogId),
 			orderBy('createdAt', 'desc'),
-			startAfter(starAfter),
+			startAfter(new Date(starAfter)),
 			limit(_limit)
 		);
 

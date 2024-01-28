@@ -1,6 +1,6 @@
 import { BadRequestError } from '$lib/error/errors.js';
 import handler from '$lib/error/httpErrorHandler';
-import { createComment, getComments } from '$lib/repository/comment';
+import { createComment, getComments, updateCommentContent } from '$lib/repository/comment';
 import { createResponse } from '$lib/utils/httpResponse';
 import { object, string, number } from 'yup';
 
@@ -48,7 +48,36 @@ export async function POST({ params, request }) {
 	}
 }
 
-export async function GET({ params }) {
+export async function GET({ params, url }) {
+	const slug = params.slug;
+	const startAfter = url.searchParams.get('startAfter');
+
+	try {
+		if (!slug || slug === '') {
+			throw new BadRequestError('Invalid comment data');
+		}
+
+		const comments = await getComments(slug, startAfter ?? undefined);
+
+		return createResponse({
+			status: 200,
+			body: {
+				comments: comments
+			}
+		});
+	} catch (e) {
+		return createResponse(handler(e));
+	}
+}
+
+const updateCommentSchema = object({
+	id: string().required(),
+	content: string().required(),
+	uid: string().required()
+});
+
+export async function PUT({ params, request }) {
+	const data = await request.json();
 	const slug = params.slug;
 
 	try {
@@ -56,12 +85,14 @@ export async function GET({ params }) {
 			throw new BadRequestError('Invalid comment data');
 		}
 
-		const comments = await getComments(slug);
+		await updateCommentSchema.validate(data);
+
+		await updateCommentContent(data.id, data.content, data.uid);
 
 		return createResponse({
 			status: 200,
 			body: {
-				comments: comments
+				message: 'Comment updated successfully'
 			}
 		});
 	} catch (e) {
