@@ -170,6 +170,31 @@
 
 	let showMenu = false;
 	let showEditField = false;
+
+	let isLiked = false;
+
+	async function toggleLike() {
+		try {
+			if (!(await siginInInvoker('You need to sign in to like')) || !userSession) {
+				return;
+			}
+
+			const res = await fetchApi(`/api/blog/${blogId}/comment/${id}/like`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					uid: userSession.uid
+				})
+			});
+
+			likesCount = likesCount + res.body.likesCount;
+			isLiked = res.body.likesCount > 0 ? true : false;
+		} catch (error) {
+			console.error(error);
+		}
+	}
 </script>
 
 <div class="flex flex-col">
@@ -284,10 +309,10 @@
 	</div>
 	<div class="flex justify-between dark:text-black mb-4">
 		<div class="flex gap-4 text-sm my-2">
-			<div>
+			<button on:click={toggleLike} class={isLiked ? 'text-pink-400' : ''}>
 				<span><i class="fa-solid fa-heart mr-2"></i></span>
 				<span>{likesCount} Likes</span>
-			</div>
+			</button>
 			<button
 				on:click={() => {
 					if (!children || repliesCount == 0) return;

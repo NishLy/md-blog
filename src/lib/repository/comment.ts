@@ -2,6 +2,7 @@ import { db } from '$lib/firebase.client';
 import {
 	addDoc,
 	collection,
+	deleteDoc,
 	doc,
 	getDoc,
 	getDocs,
@@ -9,6 +10,7 @@ import {
 	limit,
 	orderBy,
 	query,
+	setDoc,
 	startAfter,
 	updateDoc,
 	where
@@ -35,6 +37,74 @@ export type CommentInterface = {
 };
 
 const collectionName = 'comments';
+
+export type CommentLikeInterface = {
+	id: string;
+	commentId: string;
+	userId: string;
+};
+
+export const toggleCommentLike = async (
+	commentId: string,
+	userId: string
+): Promise<{
+	message: string;
+	likesCount: number;
+}> => {
+	return new Promise((resolve, reject) => {
+		const commentRef = doc(db, collectionName, commentId);
+		const commentLikeRef = doc(db, 'comment-likes', `${commentId}_${userId}`);
+
+		return getDoc(commentLikeRef)
+			.then((docSnap) => {
+				if (docSnap.exists()) {
+					return updateDoc(commentRef, {
+						likesCount: increment(-1)
+					})
+						.then(() => {
+							deleteDoc(commentLikeRef)
+								.then(() => {
+									resolve({
+										message: 'Comment like removed',
+										likesCount: -1
+									});
+								})
+								.catch((error) => {
+									reject(error);
+								});
+						})
+						.catch((error) => {
+							reject(error);
+						});
+				}
+
+				return updateDoc(commentRef, {
+					likesCount: increment(1)
+				})
+					.then(() => {
+						setDoc(commentLikeRef, {
+							commentId,
+							userId
+						})
+							.then(() => {
+								resolve({
+									message: 'Comment like added',
+									likesCount: 1
+								});
+							})
+							.catch((error) => {
+								reject(error);
+							});
+					})
+					.catch((error) => {
+						reject(error);
+					});
+			})
+			.catch((error) => {
+				reject(error);
+			});
+	});
+};
 
 export const createComment = async (comment: {
 	content: string;
