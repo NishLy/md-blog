@@ -9,6 +9,7 @@ import {
 	startAfter,
 	where
 } from 'firebase/firestore';
+import { getBlog } from './blog';
 
 export type CommentInterface = {
 	id: string;
@@ -23,6 +24,7 @@ export type CommentInterface = {
 		photoURL: string;
 	};
 	blogId: string;
+	authorId: string;
 	level: number;
 	parentId: string | undefined | null;
 };
@@ -41,25 +43,35 @@ export const createComment = async (comment: {
 	blogId: string;
 }) => {
 	return new Promise((resolve, reject) => {
-		const commentFilled: Omit<CommentInterface, 'id'> = {
-			content: comment.content,
-			user: {
-				uid: comment.user.uid,
-				displayName: comment.user.displayName,
-				photoURL: comment.user.photoURL
-			},
-			level: comment.level,
-			parentId: !comment.parentId ? null : comment.parentId,
-			blogId: comment.blogId,
-			createdAt: new Date(),
-			updatedAt: new Date(),
-			likesCount: 0,
-			repliesCount: 0
-		};
+		getBlog(comment.blogId)
+			.then((blog) => {
+				if (!blog) {
+					return reject('Blog not found');
+				}
+				const commentFilled: Omit<CommentInterface, 'id'> = {
+					content: comment.content,
+					user: {
+						uid: comment.user.uid,
+						displayName: comment.user.displayName,
+						photoURL: comment.user.photoURL
+					},
+					level: comment.level,
+					parentId: !comment.parentId ? null : comment.parentId,
+					blogId: comment.blogId,
+					authorId: blog.userId,
+					createdAt: new Date(),
+					updatedAt: new Date(),
+					likesCount: 0,
+					repliesCount: 0
+				};
 
-		addDoc(collection(db, collectionName), commentFilled)
-			.then((docRef) => {
-				resolve(docRef.id);
+				addDoc(collection(db, collectionName), commentFilled)
+					.then((docRef) => {
+						resolve(docRef.id);
+					})
+					.catch((error) => {
+						reject(error);
+					});
 			})
 			.catch((error) => {
 				reject(error);
@@ -68,7 +80,7 @@ export const createComment = async (comment: {
 };
 
 export const getComments = async (
-	blogId: number,
+	blogId: string,
 	starAfter: string | undefined = undefined,
 	_limit = 10
 ) => {
@@ -94,7 +106,9 @@ export const getComments = async (
 						.map((doc) => {
 							return {
 								id: doc.id,
-								...(doc.data() as Omit<CommentInterface, 'id'>)
+								...(doc.data() as Omit<CommentInterface, 'id'>),
+								createdAt: doc.data().createdAt.toDate(),
+								updatedAt: doc.data().updatedAt.toDate()
 							};
 						});
 
@@ -131,7 +145,9 @@ export const getComments = async (
 				.map((doc) => {
 					return {
 						id: doc.id,
-						...(doc.data() as Omit<CommentInterface, 'id'>)
+						...(doc.data() as Omit<CommentInterface, 'id'>),
+						createdAt: doc.data().createdAt.toDate(),
+						updatedAt: doc.data().updatedAt.toDate()
 					};
 				});
 
@@ -166,7 +182,9 @@ const getCommentsByParentId = async (
 				comments = querySnapshot.docs.map((doc) => {
 					return {
 						id: doc.id,
-						...(doc.data() as Omit<CommentInterface, 'id'>)
+						...(doc.data() as Omit<CommentInterface, 'id'>),
+						createdAt: doc.data().createdAt.toDate(),
+						updatedAt: doc.data().updatedAt.toDate()
 					};
 				}) as CommentInterface[];
 

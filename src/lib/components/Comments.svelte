@@ -5,16 +5,14 @@
 	import { fetchApi } from '$lib/utils/httpWrapper';
 	import type { CommentInterface } from '$lib/repository/comment';
 	import { session, userDataStore, type SessionState, type UserData } from '$lib/state/session';
+	import { onMount } from 'svelte';
 
 	export let blogId: string;
 	export let showResponses: boolean = true;
 
-	let responses: any[] = [];
 	let siginInInvoker: (m: string) => Promise<boolean>;
 
-	export let comments: ({
-		children?: ({ children?: CommentInterface[] } & CommentInterface)[];
-	} & CommentInterface)[] = [];
+	export let comments: any = [];
 
 	let userSession: UserData | undefined = undefined;
 
@@ -71,6 +69,52 @@
 			console.log(error);
 		}
 	}
+
+	onMount(async () => {
+		try {
+			const res = await fetchApi(`/api/blog/${blogId}/comment`, {
+				method: 'GET'
+			});
+
+			comments = mapComments(res.body.comments);
+			console.log(comments);
+		} catch (error) {
+			console.error(error);
+		}
+	});
+
+	function mapComments(
+		comments: ({
+			children?: ({ children?: CommentInterface[] } & CommentInterface)[];
+		} & CommentInterface)[]
+	): any {
+		function parseChildren(
+			children: (CommentInterface & { children?: CommentInterface[] })[]
+		): any {
+			return children.map((child) => {
+				return {
+					component: ResponseBox,
+					props: {
+						...child,
+						children:
+							child.children && child.children.length > 0
+								? parseChildren(child.children)
+								: undefined,
+						createdAt: new Date(child.createdAt),
+						updatedAt: new Date(child.createdAt)
+					}
+				};
+			});
+		}
+
+		return comments.map((comment) => {
+			return {
+				...comment,
+				children:
+					comment.children && comment.children.length > 0 ? parseChildren(comment.children) : []
+			};
+		});
+	}
 </script>
 
 {#if showResponses}
@@ -103,11 +147,15 @@
 		</div>
 		<hr />
 		<div class="flex flex-col gap-4 my-4">
-			{#if responses.length === 0}
+			{#if comments.length === 0}
 				<div class="text-center">No responses yet</div>
 			{:else}
 				{#each comments as comment}
-					<ResponseBox {...comment} />
+					<ResponseBox
+						{...comment}
+						createdAt={new Date(comment.createdAt)}
+						updatedAt={new Date(comment.createdAt)}
+					/>
 				{/each}
 			{/if}
 		</div>

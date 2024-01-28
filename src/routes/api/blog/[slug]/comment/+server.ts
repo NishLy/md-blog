@@ -1,6 +1,6 @@
 import { BadRequestError } from '$lib/error/errors.js';
 import handler from '$lib/error/httpErrorHandler';
-import { createComment } from '$lib/repository/comment';
+import { createComment, getComments } from '$lib/repository/comment';
 import { createResponse } from '$lib/utils/httpResponse';
 import { object, string, number } from 'yup';
 
@@ -41,6 +41,27 @@ export async function POST({ params, request }) {
 			status: 201,
 			body: {
 				message: 'Comment created successfully'
+			}
+		});
+	} catch (e) {
+		return createResponse(handler(e));
+	}
+}
+
+export async function GET({ params }) {
+	const slug = params.slug;
+
+	try {
+		if (!slug || slug === '') {
+			throw new BadRequestError('Invalid comment data');
+		}
+
+		const comments = await getComments(slug);
+
+		return createResponse({
+			status: 200,
+			body: {
+				comments: comments
 			}
 		});
 	} catch (e) {

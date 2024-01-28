@@ -1,33 +1,43 @@
 <script lang="ts">
+	import { type UserData, userDataStore } from '$lib/state/session';
 	import { printRelativeTime } from '$lib/utils/date';
+	import { fetchApi } from '$lib/utils/httpWrapper';
 	import { onMount, type ComponentType } from 'svelte';
+	import { App } from '$lib/state/app';
 
 	export let content: string;
 
-	export let likes = 0;
-	export let replies = 0;
-	export let createdAt = new Date();
-	export let user: { displayName: string; photoURL: string } = {
+	export let id: string;
+	export let likesCount = 0;
+	export let repliesCount = 0;
+	export let createdAt: Date;
+	export let updatedAt: Date;
+	export let blogId: string;
+	export let authorId: string;
+	export let level: number = 1;
+	export let parentId: null | string = null;
+	export let user: { displayName: string; photoURL: string; uid: string } = {
 		displayName: 'Anonymous',
-		photoURL: 'https://avatars.githubusercontent.com/u/54907004?v=4'
+		photoURL: 'https://avatars.githubusercontent.com/u/54907004?v=4',
+		uid: ''
 	};
 
-	export let components:
+	export let children:
 		| {
 				component: ComponentType;
 				props: {
 					likes: number;
 					replies: number;
-					date: Date;
+					createdAt: Date;
 					displayName: string;
 					photoURL: string;
 					text: string;
-					components?: {
+					children?: {
 						component: ComponentType;
 						props: {
 							likes: number;
 							replies: number;
-							date: Date;
+							createdAt: Date;
 							displayName: string;
 							photoURL: string;
 							text: string;
@@ -52,6 +62,7 @@
 
 	onMount(() => {
 		if (typeof window === 'undefined') return;
+
 		if (content.length > 200) {
 			haveMoreText = true;
 			moreText = content.slice(200);
@@ -62,7 +73,6 @@
 		new ResizeObserver(() => {
 			if (!moreRepliesElement || !verticalLineElement) return;
 
-			console.log(moreRepliesElement.clientHeight);
 			verticalLineElement.style.height = moreRepliesElement.clientHeight + 'px';
 		}).observe(moreRepliesElement);
 	});
@@ -76,6 +86,55 @@
 		isExpanded = false;
 		content = content.slice(0, 200) + '...';
 	};
+
+	let siginInInvoker: (m: string) => Promise<boolean>;
+
+	let userSession: UserData | undefined = undefined;
+
+	userDataStore.subscribe((cur) => {
+		if (!cur) return;
+		userSession = cur;
+	});
+
+	App.subscribe((app) => {
+		siginInInvoker = app.methods.invokeProtected;
+	});
+
+	async function postComment(ev: SubmitEvent) {
+		ev.preventDefault();
+		console.log(!(await siginInInvoker('You need to sign in to reply')) || !userSession);
+		try {
+			if (!(await siginInInvoker('You need to sign in to reply')) || !userSession) {
+				return;
+			}
+
+			const data = new FormData(ev.currentTarget as HTMLFormElement);
+
+			const comment = data.get('comment') as string;
+
+			if (!comment) return;
+
+			const res = await fetchApi(`/api/blog/${blogId}/comment`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					content: comment,
+					user: userSession,
+					parentId: id,
+					level: level + 1,
+					blogId: blogId
+				})
+			});
+
+			console.log(res);
+
+			alert('Comment posted successfully');
+		} catch (error) {
+			console.error(error);
+		}
+	}
 </script>
 
 <div class="flex flex-col">
@@ -88,13 +147,25 @@
 			/>
 			<div>
 				<h6>{user.displayName}</h6>
-				<p class="text-sm opacity-90">{printRelativeTime(createdAt)}</p>
+				<p class="text-sm opacity-90 flex gap-2">
+					{printRelativeTime(new Date(createdAt ?? Date.now()))}
+
+					{#if updatedAt?.getTime() != createdAt?.getTime()}
+						<span>
+							<span class=" bg-green-300 px-1 rounded-sm">Edited</span>
+						</span>
+					{/if}
+
+					{#if user.uid == authorId}
+						<span class=" bg-green-300 px-1 rounded-sm">Author</span>
+					{/if}
+				</p>
 			</div>
 		</div>
 		<div class="flex gap-4">...</div>
 	</div>
 	<div class="dark:text-black mt-4">
-		<p class="mb-2" bind:this={textElement}>
+		<p class="mb-2 whitespace-pre" bind:this={textElement}>
 			{content}
 		</p>
 		{#if haveMoreText}
@@ -109,11 +180,11 @@
 		<div class="flex gap-4 text-sm my-2">
 			<div>
 				<span><i class="fa-solid fa-heart mr-2"></i></span>
-				<span>{likes} Likes</span>
+				<span>{likesCount} Likes</span>
 			</div>
 			<button
 				on:click={() => {
-					if (!components || replies == 0) return;
+					if (!children || repliesCount == 0) return;
 
 					showReplies = !showReplies;
 
@@ -130,42 +201,52 @@
 				}}
 			>
 				<span><i class="fa-solid fa-comment mr-2"></i></span>
-				<span>{replies} Replies</span>
+				<span>{repliesCount} Replies</span>
 			</button>
 		</div>
-		<button
-			on:click={() => {
-				showReplyField = !showReplyField;
+		{#if level !== 3}
+			<button
+				on:click={() => {
+					showReplyField = !showReplyField;
 
-				if (showReplyField) {
-					replyFieldElement?.focus();
-					replyFieldElement?.scrollIntoView({ behavior: 'smooth' });
-					replyFieldElement?.classList.remove('hidden');
-				}
+					if (showReplyField) {
+						replyFieldElement?.focus();
+						replyFieldElement?.scrollIntoView({ behavior: 'smooth' });
+						replyFieldElement?.classList.remove('hidden');
+					}
 
-				if (!showReplyField) {
-					if (!verticalLineElement || !replyFieldElement) return;
-					verticalLineElement.style.height =
-						verticalLineElement.clientHeight - (replyFieldElement.clientHeight + 8) + 'px';
-					replyFieldElement?.blur();
-					replyFieldElement?.classList.add('hidden');
-				}
-			}}>Reply</button
-		>
+					if (!showReplyField) {
+						if (!verticalLineElement || !replyFieldElement) return;
+						verticalLineElement.style.height =
+							verticalLineElement.clientHeight - (replyFieldElement.clientHeight + 8) + 'px';
+						replyFieldElement?.blur();
+						replyFieldElement?.classList.add('hidden');
+					}
+				}}>Reply</button
+			>
+		{/if}
 	</div>
 	<div class="dark:text-black flex items-start h-fit" bind:this={moreRepliesElement}>
 		<div bind:this={verticalLineElement} class="w-4 border-l-4 border-green-500 min-h-full"></div>
 		<div class="flex flex-col gap-2 w-full">
 			<div class="hidden" bind:this={replyFieldElement}>
-				<textarea class="w-full p-4 rounded-md shadow-md" rows="1" placeholder="What's your thoughs"
-				></textarea>
-				<div class="flex justify-end">
-					<button class="px-4 py-2 rounded-md shadow-md bg-green-600 text-white">Reply</button>
-				</div>
+				<form on:submit={postComment}>
+					<textarea
+						class="w-full p-4 rounded-md shadow-md"
+						rows="1"
+						name="comment"
+						placeholder="What's your thoughs"
+					></textarea>
+					<div class="flex justify-end">
+						<button type="submit" class="px-4 py-2 rounded-md shadow-md bg-green-600 text-white"
+							>Reply</button
+						>
+					</div>
+				</form>
 			</div>
 			<div bind:this={moreRepliesWrapperElement} class="flex flex-col gap-2 w-full">
-				{#if components}
-					{#each components as component}
+				{#if children}
+					{#each children as component}
 						<svelte:component this={component.component} {...component.props} />
 					{/each}
 				{/if}
