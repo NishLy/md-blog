@@ -131,6 +131,7 @@ export const getAllBlogByUserId = async (
 										readTime: doc.data().readTime,
 										userId: doc.data().userId,
 										summary: doc.data().summary,
+										thumbnailURL: doc.data().thumbnailURL ?? null,
 										isPublished: doc.data().isPublished
 									};
 								})
@@ -166,6 +167,7 @@ export const getAllBlogByUserId = async (
 							readTime: doc.data().readTime,
 							userId: doc.data().userId,
 							summary: doc.data().summary,
+							thumbnailURL: doc.data().thumbnailURL ?? null,
 							isPublished: doc.data().isPublished
 						};
 					})
@@ -180,7 +182,7 @@ export const getAllBlogByUserId = async (
 export const getAllBlogByTag = async (
 	tag: string
 ): Promise<
-	{ post: Omit<Blog, 'content'>; user: { uid: string; displayName: string; photoUrl: string } }[]
+	{ post: Omit<Blog, 'content'>; user: { uid: string; displayName: string; photoURL: string } }[]
 > => {
 	return new Promise((resolve, reject) => {
 		const q = query(collection(db, collectionName), where('isPublished', '==', true));
@@ -188,7 +190,7 @@ export const getAllBlogByTag = async (
 			.then((snapshotBlog) => {
 				const blogs: {
 					post: Omit<Blog, 'content'>;
-					user: { uid: string; displayName: string; photoUrl: string };
+					user: { uid: string; displayName: string; photoURL: string };
 				}[] = [];
 
 				getDocs(collection(db, 'users')).then((snapshot) => {
@@ -219,12 +221,13 @@ export const getAllBlogByTag = async (
 								readTime: docBlog.data().readTime,
 								userId: docBlog.data().userId,
 								summary: docBlog.data().summary,
+								thumbnailURL: docBlog.data().thumbnailURL ?? null,
 								isPublished: docBlog.data().isPublished
 							},
 							user: loadedUsers[docBlog.data().userId] as {
 								uid: string;
 								displayName: string;
-								photoUrl: string;
+								photoURL: string;
 							}
 						};
 

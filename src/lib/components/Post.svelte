@@ -7,8 +7,12 @@
 	import { session, userDataStore, type SessionState } from '$lib/state/session';
 	import { goto } from '$app/navigation';
 
-	export let user: User;
-	export let post: Blog;
+	export let user: {
+		uid: string;
+		displayName: string;
+		photoURL: string;
+	};
+	export let post: Omit<Blog, 'content'>;
 	export let signInInvoker: (message: string) => Promise<boolean>;
 
 	let userData: User;
@@ -54,9 +58,9 @@
 <div class="flex flex-col gap-3 justify-start">
 	<a href={'/blog/' + post.id} class="flex flex-col gap-4">
 		<img
-			src="https://avatars.githubusercontent.com/u/54907004?v=4"
+			src={post.thumbnailURL || '/images/placeholder.png'}
 			alt="Thumbnail"
-			class="w-full aspect-video h-48 object-cover"
+			class="w-full aspect-video h-48 object-scale-down bg-black dark:bg-white"
 		/>
 		<div class="flex items-center">
 			<img

@@ -94,6 +94,11 @@
 
 <div class="flex justify-center">
 	<div class="p-10 flex flex-col gap-6 w-full max-w-4xl lg:max-w-4xl">
+		<img
+			src={data.page?.thumbnailURL || '/images/placeholder.png'}
+			alt="Thumbnail"
+			class="w-full aspect-video h-48 object-scale-down bg-black dark:bg-white"
+		/>
 		<h1 class="text-4xl font-bold">{data.page?.title}</h1>
 		<h3 class="dark:text-neutral-300">{data.page?.summary}</h3>
 		<div class="flex items-center">

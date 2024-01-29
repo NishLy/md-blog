@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import Post from '$lib/components/Post.svelte';
+	import TagsList from '$lib/components/TagsList.svelte';
 	import { userDataStore } from '$lib/state/session';
 	import { onMount } from 'svelte';
 	export let data;
 
 	let isFollowing = false;
-
-	console.log(isFollowing);
 
 	onMount(async () => {
 		const user: any = await data.getAuthUser();
@@ -35,7 +34,6 @@
 			});
 
 			isFollowing = !isFollowing;
-			console.log(isFollowing);
 		} catch (error) {
 			console.log(error);
 		}
@@ -43,11 +41,12 @@
 </script>
 
 <svelte:head>
-	<title>All Page about {data.props?.tag.name}</title>
+	<title>{data.props?.tag.name}</title>
 </svelte:head>
 
 <div class="flex flex-col gap-6 p-8 max-w-6xl items-center">
-	<h1 class="text-3xl font-bold text-center">All Page about {data.props?.tag.name}</h1>
+	<TagsList />
+	<h1 class="text-3xl font-bold text-center capitalize">{data.props?.tag.name}</h1>
 	<h6 class="dark:text-neutral-300">
 		Topic - {data.props?.tag.followers} Followers - {data.props?.tag.count} Posts
 	</h6>

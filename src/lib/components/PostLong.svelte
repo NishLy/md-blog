@@ -87,10 +87,10 @@
 			</p>
 		</div>
 		<img
-			src={post.thumbnailURL ?? '/assets/images/placeholder.png'}
+			src={post.thumbnailURL || '/images/placeholder.png'}
 			alt="Thumbnail"
 			loading="lazy"
-			class="w-36 aspect-video object-cover"
+			class="w-36 aspect-video object-scale-down dark:bg-white bg-black"
 		/>
 	</div>
 	<div class=" flex justify-between w-full box-border">
