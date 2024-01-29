@@ -46,6 +46,7 @@
 		"@toast-ui/editor": "^3.2.2",
 		"@types/dompurify": "^3.0.5",
 		"bytemd": "^1.21.0",
+		"cropperjs": "^1.6.1",
 		"dompurify": "^3.0.8",
 		"firebase": "^10.7.1",
 		"highlightjs": "^9.16.2",

@@ -87,7 +87,7 @@
 			</p>
 		</div>
 		<img
-			src="https://avatars.githubusercontent.com/u/54907004?v=4"
+			src={post.thumbnailURL ?? '/assets/images/placeholder.png'}
 			alt="Thumbnail"
 			loading="lazy"
 			class="w-36 aspect-video object-cover"

@@ -18,6 +18,7 @@
 	let readTime: number;
 	let summary: string = '';
 	let tags: string[] = [];
+	let blobThumbnail: Blob | null = null;
 
 	session.subscribe((value) => {
 		value?.user && (user = value.user);
@@ -36,8 +37,6 @@
 			})
 		);
 	})();
-
-	console.log(tags);
 
 	onMount(() => {
 		if (browser) {
@@ -67,6 +66,8 @@
 				e.preventDefault();
 				e.returnValue = '';
 			});
+
+			const image = document.getElementById('image') as HTMLImageElement;
 		}
 	});
 
@@ -94,21 +95,23 @@
 
 		if (!e.target || !editor) return;
 
+		if (!title || !readTime || !tags || !content || !user?.uid || !summary || !blobThumbnail)
+			return;
 		const userId = user?.uid;
 
-		if (!title || !readTime || !tags || !content || !user || !summary) return;
-
 		try {
-			await fetchApi('/api/page', {
+			const formData = new FormData();
+			formData.append('title', title);
+			formData.append('readTime', readTime.toString());
+			formData.append('tags', tags.join(','));
+			formData.append('content', content);
+			formData.append('userId', userId);
+			formData.append('summary', summary);
+			formData.append('thumbnail', blobThumbnail);
+
+			await fetchApi('/api/blog', {
 				method: 'POST',
-				body: JSON.stringify({
-					title,
-					readTime,
-					tags,
-					content,
-					userId,
-					summary
-				})
+				body: formData
 			});
 
 			localStorage.removeItem('content-unsaved');
@@ -117,6 +120,43 @@
 		} catch (e) {
 			console.log(e);
 		}
+	};
+
+	const resizeImage: ChangeEventHandler<HTMLInputElement> = (ev) => {
+		const element = ev.currentTarget;
+		if (!element.files) return;
+		const file = element.files[0];
+		if (!file) return;
+
+		if (file.type !== 'image/png' && file.type !== 'image/jpeg')
+			return alert('Please upload a png or jpeg file');
+
+		const reader = new FileReader();
+
+		reader.onload = (ev) => {
+			if (!ev.target) return;
+			const canvas = document.getElementById('thumbnail-canvas') as HTMLCanvasElement;
+			const ctx = canvas.getContext('2d')!;
+			const img = new Image();
+			img.src = ev.target!.result as string;
+			img.onload = () => {
+				canvas.width = img.width * 0.5;
+				canvas.height = img.height * 0.5;
+				ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+				ctx.font = '50px sans-serif';
+				ctx.fillText(title, 50, 90);
+				canvas.toBlob(
+					(blob) => {
+						if (!blob) return;
+						blobThumbnail = blob;
+					},
+					'image/png',
+					0.95
+				);
+			};
+		};
+
+		reader.readAsDataURL(file);
 	};
 </script>
 
@@ -169,6 +209,9 @@
 						console.log(tags);
 					}}
 				/>
+				<label for="tags" class="dark:text-black">Thumbnail Image</label>
+				<canvas id="thumbnail-canvas" class="aspect-video max-w-full mb-2"> </canvas>
+				<input on:change={resizeImage} required type="file" name="thumbnail" id="thumbnail-file" />
 			</div>
 			<h3 class="dark:text-black font-semibold mx-0 m-2">Content</h3>
 			<div id="editor" class="flex flex-col gap-6 w-full lg:max-w-4x box-border mb-4"></div>

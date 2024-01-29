@@ -11,7 +11,8 @@ import {
 	limit,
 	orderBy,
 	updateDoc,
-	increment
+	increment,
+	DocumentReference
 } from 'firebase/firestore';
 import type { User } from './user';
 
@@ -27,6 +28,7 @@ export interface Blog {
 	userId: string;
 	summary: string;
 	isPublished: boolean;
+	thumbnailURL?: string;
 }
 
 const collectionName = 'blogs';
@@ -37,8 +39,30 @@ export const addBlogReplyCount = async (blogId: string) => {
 	});
 };
 
-export const createBlog = async (blog: Omit<Blog, 'id'>) => {
-	return await addDoc(collection(db, collectionName), blog);
+export const createBlog = async (blog: Omit<Blog, 'id'>): Promise<DocumentReference> => {
+	return new Promise((resolve, reject) => {
+		addDoc(collection(db, collectionName), blog)
+			.then((ref) => {
+				resolve(ref);
+			})
+			.catch((error) => {
+				reject(error);
+			});
+	});
+};
+
+export const updateBlogThumbnailURL = async (blogId: string, thumbnail: string) => {
+	return new Promise((resolve, reject) => {
+		updateDoc(doc(db, collectionName, blogId), {
+			thumbnailURL: thumbnail
+		})
+			.then(() => {
+				resolve('Document successfully updated');
+			})
+			.catch((error) => {
+				reject(error);
+			});
+	});
 };
 
 export const getBlog = async (id: string): Promise<Blog> => {

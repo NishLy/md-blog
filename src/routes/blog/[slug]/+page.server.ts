@@ -37,6 +37,7 @@ export async function load({ params }) {
 					date: blogData.date,
 					readTime: blogData.readTime,
 					summary: blogData.summary,
+					thumbnailURL: blogData.thumbnailURL,
 					author: {
 						name: author.displayName,
 						avatar: author.photoURL
