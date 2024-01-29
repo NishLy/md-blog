@@ -19,7 +19,7 @@
 		class="rounded-2xl flex-shrink-0 p-2 absolute right-[-2rem] top-0 radial-background"
 		><i class="fa-solid fa-angle-right"></i>
 	</button>
-	<div bind:this={tagsWrapper} class="flex gap-4 justify-start w-full overflow-x-auto">
+	<div bind:this={tagsWrapper} class="flex gap-2 justify-start w-full overflow-x-auto">
 		<a href="/tags" class="rounded-2xl py-2 px-4 dark:bg-white dark:text-black flex-shrink-0">
 			<span>
 				<i class="fa-solid fa-magnifying-glass"></i>
@@ -31,7 +31,6 @@
 				href={`/tag/${tag}`}
 				class="rounded-2xl py-2 px-4 dark:bg-white dark:text-black flex-shrink-0"
 			>
-				<span>#</span>
 				<span>{tag}</span>
 			</a>
 		{/each}

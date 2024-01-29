@@ -1,5 +1,5 @@
 import { getAllBlogByTag } from '../../../lib/repository/blog';
-import { getTag } from '../../../lib/repository/tags';
+import { getRandomTags, getTag } from '../../../lib/repository/tags';
 
 export const prerender = true;
 
@@ -11,6 +11,7 @@ export async function load({ params }) {
 
 	const posts = await getAllBlogByTag(params.slug);
 	const tag = await getTag(params.slug);
+	const recomendedTags = await getRandomTags(10);
 
 	if (!tag) {
 		return { status: 404 };
@@ -19,7 +20,8 @@ export async function load({ params }) {
 	return {
 		props: {
 			tag,
-			posts
+			posts,
+			recomendedTags
 		}
 	};
 }

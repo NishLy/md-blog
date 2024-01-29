@@ -8,6 +8,7 @@ export type Tag = {
 	name: string;
 	followers: number;
 	count: number;
+	category: string;
 };
 
 export const getAllTags = async (): Promise<Tag[]> => {
@@ -74,6 +75,25 @@ export const toggleFollow = async (tagId: string, uid: string) => {
 							reject(error);
 						});
 				}
+			})
+			.catch((error) => {
+				reject(error);
+			});
+	});
+};
+
+export const getRandomTags = async (count: number): Promise<Tag[]> => {
+	return new Promise<Tag[]>((resolve, reject) => {
+		const tags: Tag[] = [];
+
+		getDocs(collection(db, collectionName))
+			.then((snapshot) => {
+				for (let i = 0; i < count && i < snapshot.size; i++) {
+					const index = Math.floor(Math.random() * snapshot.size);
+					tags.push(snapshot.docs[index].data() as Tag);
+				}
+
+				resolve(tags);
 			})
 			.catch((error) => {
 				reject(error);

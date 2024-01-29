@@ -28,6 +28,7 @@ export interface Blog {
 	userId: string;
 	summary: string;
 	isPublished: boolean;
+	viewsCount: number;
 	thumbnailURL?: string;
 }
 
@@ -36,6 +37,24 @@ const collectionName = 'blogs';
 export const addBlogReplyCount = async (blogId: string) => {
 	return updateDoc(doc(db, collectionName, blogId), {
 		commentsCount: increment(1)
+	});
+};
+
+export const addBlogViewField = async (blogId: string) => {
+	return updateDoc(doc(db, collectionName, blogId), {
+		viewsCount: 1
+	});
+};
+
+export const addBlogViewCount = async (blogId: string) => {
+	return updateDoc(doc(db, collectionName, blogId), {
+		viewsCount: increment(1)
+	});
+};
+
+export const addBlogLikeCount = async (blogId: string) => {
+	return updateDoc(doc(db, collectionName, blogId), {
+		likesCount: increment(1)
 	});
 };
 
@@ -70,6 +89,8 @@ export const getBlog = async (id: string): Promise<Blog> => {
 		getDoc(doc(db, collectionName, id))
 			.then((doc) => {
 				if (doc.exists()) {
+					if (!doc.data().isPublished) reject('No such document!');
+					if (!doc.data().viewsCount) addBlogViewField(id);
 					resolve({
 						id: doc.id,
 						...(doc.data() as Omit<Blog, 'id'>)
@@ -131,6 +152,7 @@ export const getAllBlogByUserId = async (
 										readTime: doc.data().readTime,
 										userId: doc.data().userId,
 										summary: doc.data().summary,
+										viewsCount: doc.data().viewsCount ?? 0,
 										thumbnailURL: doc.data().thumbnailURL ?? null,
 										isPublished: doc.data().isPublished
 									};
@@ -167,6 +189,7 @@ export const getAllBlogByUserId = async (
 							readTime: doc.data().readTime,
 							userId: doc.data().userId,
 							summary: doc.data().summary,
+							viewsCount: doc.data().viewsCount ?? 0,
 							thumbnailURL: doc.data().thumbnailURL ?? null,
 							isPublished: doc.data().isPublished
 						};
@@ -221,6 +244,7 @@ export const getAllBlogByTag = async (
 								readTime: docBlog.data().readTime,
 								userId: docBlog.data().userId,
 								summary: docBlog.data().summary,
+								viewsCount: docBlog.data().viewsCount ?? 0,
 								thumbnailURL: docBlog.data().thumbnailURL ?? null,
 								isPublished: docBlog.data().isPublished
 							},
