@@ -12,7 +12,8 @@ import {
 	orderBy,
 	updateDoc,
 	increment,
-	DocumentReference
+	DocumentReference,
+	QuerySnapshot
 } from 'firebase/firestore';
 import type { User } from './user';
 
@@ -262,6 +263,123 @@ export const getAllBlogByTag = async (
 
 					resolve(blogs);
 				});
+			})
+			.catch((error) => {
+				reject(error);
+			});
+	});
+};
+
+export const getRecomendedBlogByTag = async (
+	tag: string,
+	after: string | null = null
+): Promise<
+	{ post: Omit<Blog, 'content'>; user: { uid: string; displayName: string; photoURL: string } }[]
+> => {
+	return new Promise((resolve, reject) => {
+		if (!after) {
+			const q = query(
+				collection(db, collectionName),
+				where('isPublished', '==', true),
+				orderBy('viewsCount', 'desc'),
+				orderBy('likesCount', 'desc'),
+				orderBy('commentsCount', 'desc'),
+				orderBy('date', 'desc'),
+				limit(10)
+			);
+
+			return getDocs(q)
+				.then(async (snapshotBlog) => {
+					const blogs = await getUsersBlog(snapshotBlog, tag);
+
+					resolve(blogs);
+				})
+				.catch((error) => {
+					reject(error);
+				});
+		}
+
+		const q = query(
+			collection(db, collectionName),
+			where('isPublished', '==', true),
+			orderBy('viewsCount', 'desc'),
+			orderBy('likesCount', 'desc'),
+			orderBy('commentsCount', 'desc'),
+			orderBy('date', 'desc'),
+			startAfter(after),
+			limit(10)
+		);
+
+		return getDocs(q)
+			.then(async (snapshotBlog) => {
+				const blogs = await getUsersBlog(snapshotBlog, tag);
+				resolve(blogs);
+			})
+			.catch((error) => {
+				reject(error);
+			});
+	});
+};
+
+export const getUsersBlog = (
+	snapshotBlog: QuerySnapshot,
+	tag: string
+): Promise<
+	{
+		post: Omit<Blog, 'content'>;
+		user: { uid: string; displayName: string; photoURL: string };
+	}[]
+> => {
+	return new Promise((resolve, reject) => {
+		const blogs: {
+			post: Omit<Blog, 'content'>;
+			user: { uid: string; displayName: string; photoURL: string };
+		}[] = [];
+		getDocs(collection(db, 'users'))
+			.then((snapshot) => {
+				const loadedUsers: Record<string, Partial<User>> = {};
+
+				snapshot.forEach((doc) => {
+					loadedUsers[doc.id] = {
+						uid: doc.id,
+						...(doc.data() as Omit<Omit<User, 'uid'>, 'createdAt'>)
+					};
+
+					delete loadedUsers[doc.id].about;
+					delete loadedUsers[doc.id].bookmarks;
+					delete loadedUsers[doc.id].createdAt;
+					delete loadedUsers[doc.id].followers;
+					delete loadedUsers[doc.id].following;
+				});
+
+				snapshotBlog.forEach((docBlog) => {
+					const data = {
+						post: {
+							id: docBlog.id,
+							title: docBlog.data().title,
+							likesCount: docBlog.data().likesCount,
+							commentsCount: docBlog.data().commentsCount,
+							tags: docBlog.data().tags,
+							date: docBlog.data().date,
+							readTime: docBlog.data().readTime,
+							userId: docBlog.data().userId,
+							summary: docBlog.data().summary,
+							viewsCount: docBlog.data().viewsCount ?? 0,
+							thumbnailURL: docBlog.data().thumbnailURL ?? null,
+							isPublished: docBlog.data().isPublished
+						},
+						user: loadedUsers[docBlog.data().userId] as {
+							uid: string;
+							displayName: string;
+							photoURL: string;
+						}
+					};
+
+					if (data.post.tags.includes(tag)) {
+						blogs.push(data);
+					}
+				});
+				resolve(blogs);
 			})
 			.catch((error) => {
 				reject(error);
