@@ -35,7 +35,6 @@
 				observer = undefined;
 				isEnd = true;
 			}
-		} catch (e) {
 		} finally {
 			isLoaded = true;
 		}
