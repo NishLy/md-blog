@@ -25,6 +25,7 @@ export async function POST(event) {
 			content: data.get('content') as string,
 			readTime: Number(data.get('readTime')),
 			userId: data.get('userId') as string,
+			viewsCount: 0,
 			isPublished: true,
 			likesCount: 0,
 			commentsCount: 0

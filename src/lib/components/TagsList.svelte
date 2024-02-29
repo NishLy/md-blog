@@ -9,18 +9,18 @@
 		on:click={() => {
 			tagsWrapper.scrollLeft -= 100;
 		}}
-		class="rounded-2xl flex-shrink-0 p-2 absolute left-[-2rem] top-0 radial-background"
+		class="rounded-2xl flex-shrink-0 px-2 absolute left-[-2rem] top-[50%] translate-y-[-50%] radial-background"
 		><i class="fa-solid fa-angle-left"></i>
 	</button>
 	<button
 		on:click={() => {
 			tagsWrapper.scrollLeft += 100;
 		}}
-		class="rounded-2xl flex-shrink-0 p-2 absolute right-[-2rem] top-0 radial-background"
+		class="rounded-2xl flex-shrink-0 py-1 px-2 absolute right-[-2rem] top-[50%] translate-y-[-50%] radial-background"
 		><i class="fa-solid fa-angle-right"></i>
 	</button>
 	<div bind:this={tagsWrapper} class="flex gap-2 justify-start w-full overflow-x-auto">
-		<a href="/tags" class="rounded-2xl py-2 px-4 dark:bg-white dark:text-black flex-shrink-0">
+		<a href="/tags" class="rounded-2xl py-1 px-4 dark:bg-white dark:text-black flex-shrink-0">
 			<span>
 				<i class="fa-solid fa-magnifying-glass"></i>
 			</span>
@@ -29,7 +29,7 @@
 		{#each tags as tag}
 			<a
 				href={`/tag/${tag}`}
-				class="rounded-2xl py-2 px-4 dark:bg-white dark:text-black flex-shrink-0"
+				class="rounded-2xl py-1 px-4 dark:bg-white dark:text-black flex-shrink-0"
 			>
 				<span>{tag}</span>
 			</a>
