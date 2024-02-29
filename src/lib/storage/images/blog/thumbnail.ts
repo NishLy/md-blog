@@ -1,4 +1,4 @@
-import { storage } from '$lib/firebase.client';
+import { storage } from '$lib/firebaseApp';
 import { deleteObject, getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 
 export const uploadThumbnailFile = (file: File, fileName: string): Promise<string> => {

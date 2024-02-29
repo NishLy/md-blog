@@ -1,4 +1,4 @@
-import { db } from '$lib/firebase.client';
+import { db } from '$lib/firebaseApp';
 import { addDoc, collection, deleteDoc, doc, limit, query, where } from 'firebase/firestore';
 import { getDocs } from 'firebase/firestore';
 

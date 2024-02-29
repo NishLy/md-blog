@@ -1,4 +1,4 @@
-import { initializeFirebase } from '$lib/firebase.client';
+import { initializeFirebase } from '$lib/firebaseApp';
 
 export async function load() {
 	try {

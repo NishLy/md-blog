@@ -1,14 +1,13 @@
 import { Marked } from 'marked';
 import { error } from '@sveltejs/kit';
-import hljs from 'highlightjs';
+import hljs  from 'highlight.js';
 import { markedHighlight } from 'marked-highlight';
 import { getBlog } from '../../../lib/repository/blog';
 import { getUser } from '../../../lib/repository/user';
 
 export const prerender = true;
 
-/** @type {import('./$types').PageServerLoad} */
-export async function load({ params }) {
+export async function load({ params }: { params: { slug: string } }) {
 	try {
 		const blogData = await getBlog(params.slug);
 		const author = await getUser(blogData.userId);
@@ -17,13 +16,13 @@ export async function load({ params }) {
 			markedHighlight({
 				langPrefix: 'hljs language-',
 				highlight(code, lang) {
-					const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-					return hljs.highlight(language, code).value;
+				  const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+				  return hljs.highlight(code, { language }).value;
 				}
 			})
 		);
 
-		const parsedMarkdown = await marked.parse(blogData.content);
+		const parsedMarkdown = marked.parse(blogData.content);
 
 		if (parsedMarkdown) {
 			return {

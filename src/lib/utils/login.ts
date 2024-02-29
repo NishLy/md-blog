@@ -1,4 +1,4 @@
-import { auth } from '$lib/firebase.client';
+import { auth } from '$lib/firebaseApp';
 import { session } from '$lib/state/session';
 import type { FirebaseError } from 'firebase/app';
 import {

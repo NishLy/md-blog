@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { auth } from '$lib/firebase.client';
+	import { auth } from '$lib/firebaseApp';
 	import { session, userDataStore, type User } from '$lib/state/session';
 	import { sidemenu } from '$lib/state/sidemenu';
 	import { signOut } from 'firebase/auth';

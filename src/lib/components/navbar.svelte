@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { auth } from '$lib/firebase.client';
+	import { auth } from '$lib/firebaseApp';
 	import { session, type User, type UserData } from '$lib/state/session';
 	import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 	import { onMount } from 'svelte';
