@@ -8,6 +8,7 @@
 	import Sidemenu from '$lib/components/Sidemenu.svelte';
 	import Signin from '$lib/components/Signin.svelte';
 	import { fetchApi } from '$lib/utils/httpWrapper';
+	import Toast from '$lib/components/commons/Toast.svelte';
 
 	export let data;
 
@@ -73,3 +74,6 @@
 	<Sidemenu />
 	<Signin />
 {/if}
+
+
+<Toast />
